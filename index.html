@@ -159,8 +159,8 @@ select.si{cursor:pointer}
 .disp:not(.ui-vis){cursor:none}
 .dslide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .75s ease;pointer-events:none}
 .dslide.active{opacity:1;pointer-events:auto}
-.dslide img{max-width:100%;max-height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none}
-.dslide canvas{max-width:100%;max-height:100%;display:block}
+.dslide img{width:100%;height:100%;object-fit:cover;display:block;user-select:none;-webkit-user-drag:none}
+.dslide canvas{max-width:100%;max-height:100%;display:block;object-fit:contain}
 .dslide iframe{width:100vw;height:100vh;border:none}
 .d-prog{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#c9a84c,#7c5cbf);z-index:20;transition:width .1s linear}
 .d-ui{position:fixed;bottom:0;left:0;right:0;padding:20px 28px;background:linear-gradient(transparent,rgba(0,0,0,.55));display:flex;align-items:flex-end;justify-content:space-between;z-index:10;opacity:0;transition:opacity .3s}
@@ -706,13 +706,21 @@ async function renderAdmin() {
   }
 }
 
-// ── DISPLAY ───────────────────────────────────────────────────
+// ── DISPLAY (SYNCHRONISED) ────────────────────────────────────
+// How sync works:
+//  - One "master" timer writes {slide_index, started_at} to the `sync` table every time the slide changes
+//  - Every display screen subscribes to that row via Supabase Realtime
+//  - When a sync update arrives, all screens jump to the correct slide and calculate
+//    how far through the current duration they should already be (so progress bar is accurate)
+//  - The first screen to open becomes master; if it closes another takes over within one slide cycle
+
 async function renderDisplay() {
   app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div><div style="font-size:13px;color:rgba(255,255,255,.3)">Loading slideshow…</div></div>`
 
-  const [rPl, rCfg] = await Promise.all([
+  const [rPl, rCfg, rSync] = await Promise.all([
     db.from('playlists').select('id').eq('is_active',true).single(),
-    db.from('settings').select('*').eq('id',1).single()
+    db.from('settings').select('*').eq('id',1).single(),
+    db.from('sync').select('*').eq('id',1).single()
   ])
   const cfg = rCfg.data || {default_duration_ms:8000,transition:'fade',show_progress:true,auto_loop:true}
 
@@ -724,6 +732,8 @@ async function renderDisplay() {
 
   const items = expandSlides(rawSlides)
   let idx=0, alive=true, timer=null, raf=null, cursorT=null
+  let isMaster = false
+  const MASTER_KEY = 'slideloop_master_' + (rPl.data?.id || 'default')
 
   if (!items.length) {
     app.innerHTML = `
@@ -763,55 +773,141 @@ async function renderDisplay() {
     else{const fr=document.createElement('iframe');fr.src=`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.file_url)}`;fr.allowFullscreen=true;el.appendChild(fr)}
   }
 
-  function showSlide(n) {
-    slideEls[idx].classList.remove('active')
-    idx=((n%items.length)+items.length)%items.length
-    build(idx);build((idx+1)%items.length)
-    slideEls[idx].classList.add('active')
-    document.getElementById('d-ctr').textContent=`${idx+1} / ${items.length}`
-    tick()
+  // Write sync state to DB (master only)
+  async function pushSync(newIdx) {
+    await db.from('sync').upsert({
+      id: 1,
+      slide_index: newIdx,
+      started_at: new Date().toISOString(),
+      playlist_id: rPl.data?.id || null
+    })
   }
 
-  function tick() {
-    clearTimeout(timer);cancelAnimationFrame(raf)
-    const dur=items[idx]?.duration_ms||cfg.default_duration_ms||8000
-    const t0=performance.now()
-    const progEl=document.getElementById('d-prog')
-    const loop=()=>{
+  // Apply a sync state — jump to correct slide, offset progress bar
+  function applySync(syncData) {
+    if (!syncData) return
+    const newIdx = ((syncData.slide_index % items.length) + items.length) % items.length
+    const startedAt = new Date(syncData.started_at).getTime()
+    const elapsed = Date.now() - startedAt
+    const dur = items[newIdx]?.duration_ms || cfg.default_duration_ms || 8000
+    const remaining = Math.max(0, dur - elapsed)
+
+    // Switch slide
+    slideEls[idx].classList.remove('active')
+    idx = newIdx
+    build(idx); build((idx+1)%items.length)
+    slideEls[idx].classList.add('active')
+    document.getElementById('d-ctr').textContent = `${idx+1} / ${items.length}`
+
+    // Progress bar starting from correct offset
+    clearTimeout(timer); cancelAnimationFrame(raf)
+    const alreadyPct = Math.min(100, (elapsed/dur)*100)
+    const t0 = performance.now() - elapsed
+    const progEl = document.getElementById('d-prog')
+    if (progEl && cfg.show_progress) progEl.style.width = alreadyPct + '%'
+
+    const loop = () => {
       if(!alive)return
-      const pct=Math.min(100,((performance.now()-t0)/dur)*100)
+      const pct = Math.min(100,((performance.now()-t0)/dur)*100)
       if(progEl&&cfg.show_progress)progEl.style.width=pct+'%'
       if(pct<100)raf=requestAnimationFrame(loop)
     }
     if(cfg.show_progress)raf=requestAnimationFrame(loop)
-    if(cfg.auto_loop||idx<items.length-1)timer=setTimeout(()=>{if(alive)showSlide(idx+1)},dur)
+
+    // Schedule next slide (master only)
+    if (isMaster && (cfg.auto_loop || idx < items.length-1)) {
+      timer = setTimeout(() => {
+        if(!alive)return
+        const nextIdx = (idx+1) % items.length
+        pushSync(nextIdx)
+        applySync({ slide_index: nextIdx, started_at: new Date().toISOString(), playlist_id: rPl.data?.id })
+      }, remaining)
+    }
   }
 
+  // Become master: this tab drives the sync clock
+  function becomeMaster() {
+    if (isMaster) return
+    isMaster = true
+    localStorage.setItem(MASTER_KEY, Date.now().toString())
+    // Start from current idx
+    pushSync(idx)
+    applySync({ slide_index: idx, started_at: new Date().toISOString() })
+  }
+
+  // Check if we should be master (no other master recently)
+  function checkMaster() {
+    const last = parseInt(localStorage.getItem(MASTER_KEY) || '0')
+    const age  = Date.now() - last
+    // Become master if no heartbeat in last 3 seconds (other master gone)
+    if (age > 3000) becomeMaster()
+  }
+
+  // Master heartbeat — keep localStorage fresh so other tabs know we're alive
+  const heartbeat = setInterval(() => {
+    if (!alive) return
+    if (isMaster) localStorage.setItem(MASTER_KEY, Date.now().toString())
+    else checkMaster()
+  }, 1000)
+
+  // Manual navigation always becomes master
+  function manualNav(n) {
+    isMaster = true
+    localStorage.setItem(MASTER_KEY, Date.now().toString())
+    const newIdx = ((n%items.length)+items.length)%items.length
+    pushSync(newIdx)
+    applySync({ slide_index: newIdx, started_at: new Date().toISOString() })
+  }
+
+  // UI
   const showUI=()=>{root.classList.add('ui-vis');clearTimeout(cursorT);cursorT=setTimeout(()=>root.classList.remove('ui-vis'),3000)}
   root.addEventListener('mousemove',showUI);root.addEventListener('touchstart',showUI)
   setTimeout(()=>root.classList.remove('ui-vis'),3000)
 
   const sp=fn=>e=>{e.stopPropagation();fn()}
-  root.onclick=()=>showSlide(idx+1)
-  document.getElementById('d-prev').onclick=sp(()=>showSlide(idx-1))
-  document.getElementById('d-next').onclick=sp(()=>showSlide(idx+1))
+  root.onclick=()=>manualNav(idx+1)
+  document.getElementById('d-prev').onclick=sp(()=>manualNav(idx-1))
+  document.getElementById('d-next').onclick=sp(()=>manualNav(idx+1))
   document.getElementById('d-fs').onclick=sp(()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.())
 
   const onKey=e=>{
-    if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();showSlide(idx+1)}
-    if(e.key==='ArrowLeft'){e.preventDefault();showSlide(idx-1)}
+    if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();manualNav(idx+1)}
+    if(e.key==='ArrowLeft'){e.preventDefault();manualNav(idx-1)}
     if(e.key.toLowerCase()==='f')document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()
   }
   window.addEventListener('keydown',onKey)
 
+  // Realtime: listen for sync updates from master
   const chan=db.channel('display-rt')
     .on('postgres_changes',{event:'*',schema:'public',table:'slides'},()=>{if(alive){alive=false;renderDisplay()}})
     .on('postgres_changes',{event:'*',schema:'public',table:'settings'},()=>{if(alive){alive=false;renderDisplay()}})
     .on('postgres_changes',{event:'*',schema:'public',table:'playlists'},()=>{if(alive){alive=false;renderDisplay()}})
+    .on('postgres_changes',{event:'*',schema:'public',table:'sync'},(_,payload)=>{
+      if(!alive)return
+      const s = payload?.new || payload
+      // Non-masters just follow the sync signal
+      if(!isMaster) applySync(s)
+    })
     .subscribe()
 
-  showSlide(0)
-  teardown=()=>{alive=false;clearTimeout(timer);cancelAnimationFrame(raf);clearTimeout(cursorT);window.removeEventListener('keydown',onKey);db.removeChannel(chan)}
+  // Init: apply existing sync state or become master
+  if (rSync.data && rSync.data.playlist_id === rPl.data?.id) {
+    // There's an existing sync state — follow it (but check if master is alive)
+    applySync(rSync.data)
+    setTimeout(checkMaster, 2000) // Give existing master 2s to heartbeat
+  } else {
+    // No sync state yet — become master immediately
+    becomeMaster()
+  }
+
+  teardown=()=>{
+    alive=false
+    clearInterval(heartbeat)
+    if(isMaster) localStorage.removeItem(MASTER_KEY)
+    clearTimeout(timer);cancelAnimationFrame(raf);clearTimeout(cursorT)
+    window.removeEventListener('keydown',onKey)
+    db.removeChannel(chan)
+  }
 }
 
 async function renderPdfPage(item,el) {
