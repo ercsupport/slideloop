@@ -159,7 +159,7 @@ select.si{cursor:pointer}
 .disp:not(.ui-vis){cursor:none}
 .dslide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .75s ease;pointer-events:none}.dslide-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(18px) brightness(0.35);transform:scale(1.1);z-index:0}
 .dslide.active{opacity:1;pointer-events:auto}
-.dslide img{max-width:100vw;max-height:100vh;width:auto;height:auto;display:block;user-select:none;-webkit-user-drag:none;position:relative;z-index:1}
+.dslide img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none;z-index:1}
 .dslide canvas{max-width:100%;max-height:100%;display:block;object-fit:contain}
 .dslide iframe{width:100vw;height:100vh;border:none}
 .d-prog{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#c9a84c,#7c5cbf);z-index:20;transition:width .1s linear}
@@ -177,6 +177,31 @@ select.si{cursor:pointer}
 @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 #toasts{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
 .toast{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideUp .2s ease}
+/* DISPLAY PICKER */
+.picker{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden}
+.picker-bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 80% 90%,rgba(180,120,20,.13),transparent 60%),radial-gradient(ellipse 50% 40% at 20% 10%,rgba(60,40,120,.08),transparent 50%),#080910;pointer-events:none}
+.picker-inner{position:relative;z-index:1;text-align:center;max-width:900px;width:100%}
+.picker-logo{font-family:var(--fd);font-size:clamp(36px,6vw,64px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;background:linear-gradient(135deg,#d4a84b 0%,#c8a24a 25%,#b89fca 65%,#8b6fc4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.picker-sub{font-size:15px;color:var(--muted);font-weight:300;margin-bottom:48px}
+.picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;text-align:left}
+.picker-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s;position:relative;overflow:hidden}
+.picker-card::before{content:'';position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(ellipse at 30% 0%,rgba(255,255,255,.03),transparent 70%);pointer-events:none}
+.picker-card:hover{background:var(--bg3);border-color:var(--border2);transform:translateY(-2px)}
+.picker-card-icon{width:44px;height:44px;border-radius:10px;background:rgba(180,120,20,.15);color:#c9a84c;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
+.picker-card-name{font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:5px}
+.picker-card-playlist{font-size:13px;color:var(--muted);font-weight:300}
+.picker-card-arrow{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;float:right;color:var(--dim);margin-top:18px;transition:background .2s}
+.picker-card:hover .picker-card-arrow{background:rgba(255,255,255,.1);color:var(--text)}
+.picker-back{position:absolute;top:24px;left:24px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;background:none;transition:color .2s;z-index:2}
+.picker-back:hover{color:var(--text)}
+.picker-empty{color:var(--muted);font-size:14px;padding:40px;text-align:center}
+/* DISPLAY MANAGEMENT IN ADMIN */
+.disp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.disp-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:11px 13px}
+.disp-item-name{font-size:13px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between}
+.disp-item-row{display:flex;align-items:center;gap:6px;margin-top:5px}
+.disp-name-input{background:#0d0f1c;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-weight:600;flex:1;min-width:0}
+.disp-name-input:focus{border-color:rgba(61,90,241,.4)}
 </style>
 </head>
 <body>
@@ -208,10 +233,11 @@ route()
 function route() {
   teardown?.(); teardown = null
   const h = location.hash.replace(/^#\/?/, '')
-  if      (h === 'display')     renderDisplay()
-  else if (h === 'admin')       renderAdmin()
-  else if (h === 'admin/login') renderLogin()
-  else                          renderHome()
+  if      (h === 'displays')           renderDisplayPicker()
+  else if (h.startsWith('display/'))   renderDisplay(h.split('/')[1])
+  else if (h === 'admin')              renderAdmin()
+  else if (h === 'admin/login')        renderLogin()
+  else                                 renderHome()
 }
 
 const go = p => location.hash = p
@@ -247,7 +273,7 @@ function renderHome() {
         </div>
       </div>
     </div>`
-  document.getElementById('c-display').onclick = () => go('display')
+  document.getElementById('c-display').onclick = () => go('displays')
   document.getElementById('c-admin').onclick   = () => go('admin')
 }
 
@@ -286,18 +312,67 @@ function renderLogin() {
   pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit() })
 }
 
+// ── DISPLAY PICKER ────────────────────────────────────────────
+async function renderDisplayPicker() {
+  app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div></div>`
+
+  const { data: displays } = await db.from('displays').select('*, playlists(name)').order('created_at')
+
+  app.innerHTML = ''
+  const wrap = document.createElement('div'); wrap.className = 'picker'
+  const bg   = document.createElement('div'); bg.className = 'picker-bg'
+
+  const backBtn = document.createElement('button'); backBtn.className = 'picker-back'
+  backBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home'
+  backBtn.onclick = () => go('')
+
+  const inner = document.createElement('div'); inner.className = 'picker-inner'
+  const logoEl = document.createElement('div'); logoEl.className = 'picker-logo'; logoEl.textContent = 'SlideLoop'
+  const subEl  = document.createElement('div'); subEl.className  = 'picker-sub';  subEl.textContent  = 'Choose a display'
+  const grid   = document.createElement('div'); grid.className   = 'picker-grid'
+
+  if (!displays || displays.length === 0) {
+    grid.innerHTML = '<div class="picker-empty">No displays set up yet.<br>Ask your admin to create some.</div>'
+  } else {
+    displays.forEach(disp => {
+      const card = document.createElement('div'); card.className = 'picker-card'
+      const playlistName = disp.playlists?.name || 'No playlist assigned'
+      card.innerHTML = `
+        <div class="picker-card-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="picker-card-name">${disp.name}</div>
+        <div class="picker-card-playlist">${playlistName}</div>
+        <div class="picker-card-arrow">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>`
+      card.onclick = () => {
+        if (!disp.playlist_id) { alert('No playlist assigned to this display yet. Ask your admin.'); return }
+        go(`display/${disp.id}`)
+      }
+      grid.appendChild(card)
+    })
+  }
+
+  inner.appendChild(logoEl); inner.appendChild(subEl); inner.appendChild(grid)
+  wrap.appendChild(bg); wrap.appendChild(backBtn); wrap.appendChild(inner)
+  app.appendChild(wrap)
+}
+
 // ── ADMIN ─────────────────────────────────────────────────────
 async function renderAdmin() {
   const { data: { session } } = await db.auth.getSession()
   if (!session) { go('admin/login'); return }
 
-  // Load playlists, settings
+  // Load playlists, settings, displays
   let playlists = [], slides = [], activePl = null, selectedPl = null
+  let displays = []
   let cfg = { default_duration_ms:8000, transition:'fade', show_progress:true, auto_loop:true }
 
-  const [rPl, rCfg] = await Promise.all([
+  const [rPl, rCfg, rDisp] = await Promise.all([
     db.from('playlists').select('*').order('created_at'),
-    db.from('settings').select('*').eq('id',1).single()
+    db.from('settings').select('*').eq('id',1).single(),
+    db.from('displays').select('*').order('created_at')
   ])
 
   if (rPl.data?.length) {
@@ -310,6 +385,7 @@ async function renderAdmin() {
     if (newPl) { playlists = [newPl]; activePl = newPl; selectedPl = newPl }
   }
   if (rCfg.data) cfg = rCfg.data
+  if (rDisp.data) displays = rDisp.data
 
   // Fetch slides for selected playlist
   async function loadSlides() {
@@ -370,15 +446,18 @@ async function renderAdmin() {
           </div>
           <button class="btn btn-primary" id="btn-save">Save Settings</button>
           <hr class="divider">
+          <div class="sec-title">Displays</div>
+          <div id="disp-mgmt-area"></div>
+          <hr class="divider">
           <div class="help-box">
             <b>Tips</b>
-            Drag slides to reorder · Each slide has its own duration · Create multiple playlists and switch which one is Live
+            Drag slides to reorder · Each slide has its own duration · Create playlists and assign them to displays
           </div>
         </aside>
       </div>
     </div>`
 
-  document.getElementById('btn-preview').onclick = () => go('display')
+  document.getElementById('btn-preview').onclick = () => go('displays')
   document.getElementById('btn-logout').onclick  = async () => { await db.auth.signOut(); go('') }
   document.getElementById('cfg-prog').onclick = function() { this.classList.toggle('on') }
   document.getElementById('cfg-loop').onclick = function() { this.classList.toggle('on') }
@@ -408,6 +487,7 @@ async function renderAdmin() {
   }
 
   drawPlaylistTabs()
+  drawDisplays()
 
   // ── PLAYLIST TABS ──
   function drawPlaylistTabs() {
@@ -706,6 +786,76 @@ async function renderAdmin() {
   }
 }
 
+// ── DISPLAY MANAGEMENT (ADMIN) ───────────────────────────────
+  function drawDisplays() {
+    const area = document.getElementById('disp-mgmt-area')
+    if (!area) return
+    area.innerHTML = ''
+
+    if (displays.length) {
+      const list = document.createElement('div'); list.className = 'disp-list'
+      displays.forEach((disp, i) => {
+        const item = document.createElement('div'); item.className = 'disp-item'
+
+        // Name row
+        const nameRow = document.createElement('div'); nameRow.className = 'disp-item-name'
+        const nameInput = document.createElement('input'); nameInput.className = 'disp-name-input'
+        nameInput.value = disp.name; nameInput.title = 'Click to rename'
+        nameInput.onchange = async () => {
+          const newName = nameInput.value.trim()
+          if (!newName) { nameInput.value = disp.name; return }
+          await db.from('displays').update({ name: newName }).eq('id', disp.id)
+          displays[i].name = newName
+        }
+        const delBtn = document.createElement('button'); delBtn.className = 'btn btn-danger btn-sm btn-ic'
+        delBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>'
+        delBtn.title = 'Delete display'
+        delBtn.onclick = async () => {
+          if (!confirm(`Delete display "${disp.name}"?`)) return
+          await db.from('displays').delete().eq('id', disp.id)
+          displays = displays.filter(d => d.id !== disp.id)
+          drawDisplays()
+          toast(`"${disp.name}" deleted`)
+        }
+        nameRow.appendChild(nameInput); nameRow.appendChild(delBtn)
+
+        // Playlist assign row
+        const plRow = document.createElement('div'); plRow.className = 'disp-item-row'
+        const plLabel = document.createElement('span'); plLabel.style.cssText = 'font-size:11px;color:var(--muted);flex-shrink:0'
+        plLabel.textContent = 'Playlist:'
+        const plSelect = document.createElement('select'); plSelect.className = 'si'; plSelect.style.cssText = 'flex:1;min-width:0;font-size:12px'
+        const noneOpt = document.createElement('option'); noneOpt.value = ''; noneOpt.textContent = '— none —'
+        plSelect.appendChild(noneOpt)
+        playlists.forEach(pl => {
+          const opt = document.createElement('option'); opt.value = pl.id; opt.textContent = pl.name
+          if (pl.id === disp.playlist_id) opt.selected = true
+          plSelect.appendChild(opt)
+        })
+        plSelect.onchange = async () => {
+          const plId = plSelect.value || null
+          await db.from('displays').update({ playlist_id: plId }).eq('id', disp.id)
+          displays[i].playlist_id = plId
+        }
+        plRow.appendChild(plLabel); plRow.appendChild(plSelect)
+
+        item.appendChild(nameRow); item.appendChild(plRow)
+        list.appendChild(item)
+      })
+      area.appendChild(list)
+    }
+
+    const addBtn = document.createElement('button'); addBtn.className = 'btn btn-ghost btn-sm'
+    addBtn.style.width = '100%'
+    addBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> New Display'
+    addBtn.onclick = async () => {
+      const name = prompt('Display name (e.g. Reception, Canteen, Hall):')
+      if (!name?.trim()) return
+      const { data: newDisp } = await db.from('displays').insert({ name: name.trim(), playlist_id: null }).select().single()
+      if (newDisp) { displays.push(newDisp); drawDisplays(); toast(`Display "${newDisp.name}" created`) }
+    }
+    area.appendChild(addBtn)
+  }
+
 // ── DISPLAY (SYNCHRONISED) ────────────────────────────────────
 // How sync works:
 //  - One "master" timer writes {slide_index, started_at} to the `sync` table every time the slide changes
@@ -714,26 +864,34 @@ async function renderAdmin() {
 //    how far through the current duration they should already be (so progress bar is accurate)
 //  - The first screen to open becomes master; if it closes another takes over within one slide cycle
 
-async function renderDisplay() {
+async function renderDisplay(displayId) {
   app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div><div style="font-size:13px;color:rgba(255,255,255,.3)">Loading slideshow…</div></div>`
 
-  const [rPl, rCfg, rSync] = await Promise.all([
-    db.from('playlists').select('id').eq('is_active',true).single(),
-    db.from('settings').select('*').eq('id',1).single(),
-    db.from('sync').select('*').eq('id',1).single()
+  // Fetch display record to find its playlist
+  const [rDisp, rCfg] = await Promise.all([
+    displayId ? db.from('displays').select('*, playlists(id)').eq('id', displayId).single() : Promise.resolve({data:null}),
+    db.from('settings').select('*').eq('id',1).single()
   ])
   const cfg = rCfg.data || {default_duration_ms:8000,transition:'fade',show_progress:true,auto_loop:true}
 
+  // Get playlist id from display record
+  const playlistId = rDisp.data?.playlist_id || rDisp.data?.playlists?.id || null
+
+  // Fetch sync state for this display
+  const rSync = displayId
+    ? await db.from('sync').select('*').eq('display_id', displayId).single()
+    : {data:null}
+
   let rawSlides = []
-  if (rPl.data) {
-    const {data} = await db.from('slides').select('*').eq('playlist_id',rPl.data.id).order('display_order')
+  if (playlistId) {
+    const {data} = await db.from('slides').select('*').eq('playlist_id', playlistId).order('display_order')
     rawSlides = data || []
   }
 
   const items = expandSlides(rawSlides)
   let idx=0, alive=true, timer=null, raf=null, cursorT=null
   let isMaster = false
-  const MASTER_KEY = 'slideloop_master_' + (rPl.data?.id || 'default')
+  const MASTER_KEY = 'slideloop_master_' + (displayId || 'default')
 
   if (!items.length) {
     app.innerHTML = `
@@ -741,7 +899,7 @@ async function renderDisplay() {
         <div class="d-logo" style="margin-bottom:12px">SlideLoop</div>
         <div style="font-size:15px">No slides to display</div>
         <div style="font-size:13px;margin-top:4px">Add slides from the admin panel</div>
-        <button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash=''">← Home</button>
+        <button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button>
       </div>`
     return
   }
@@ -781,11 +939,12 @@ async function renderDisplay() {
 
   // Write sync state to DB (master only)
   async function pushSync(newIdx) {
+    if (!displayId) return
     await db.from('sync').upsert({
-      id: 1,
+      display_id: displayId,
       slide_index: newIdx,
       started_at: new Date().toISOString(),
-      playlist_id: rPl.data?.id || null
+      playlist_id: playlistId
     })
   }
 
@@ -888,7 +1047,7 @@ async function renderDisplay() {
     .on('postgres_changes',{event:'*',schema:'public',table:'slides'},()=>{if(alive){alive=false;renderDisplay()}})
     .on('postgres_changes',{event:'*',schema:'public',table:'settings'},()=>{if(alive){alive=false;renderDisplay()}})
     .on('postgres_changes',{event:'*',schema:'public',table:'playlists'},()=>{if(alive){alive=false;renderDisplay()}})
-    .on('postgres_changes',{event:'*',schema:'public',table:'sync'},(_,payload)=>{
+    .on('postgres_changes',{event:'*',schema:'public',table:'sync',filter:`display_id=eq.${displayId}`},(_,payload)=>{
       if(!alive)return
       const s = payload?.new || payload
       // Non-masters just follow the sync signal
@@ -897,7 +1056,7 @@ async function renderDisplay() {
     .subscribe()
 
   // Init: apply existing sync state or become master
-  if (rSync.data && rSync.data.playlist_id === rPl.data?.id) {
+  if (rSync.data && rSync.data.playlist_id === playlistId) {
     // There's an existing sync state — follow it (but check if master is alive)
     applySync(rSync.data)
     setTimeout(checkMaster, 2000) // Give existing master 2s to heartbeat
