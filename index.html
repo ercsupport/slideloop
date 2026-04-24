@@ -238,38 +238,51 @@ function renderHome() {
 
 // ── LOGIN ────────────────────────────────────────────────────
 function renderLogin() {
-  app.innerHTML = `
-    <div class="auth-wrap">
-      <div class="auth-card">
-        <button class="auth-back" id="back-btn">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back to home
-        </button>
-        <div class="auth-logo">SlideLoop</div>
-        <div class="auth-sub">Sign in to manage your slideshow</div>
-        <div id="login-err"></div>
-        <div class="fg"><label class="fl">Email</label><input class="fi" id="em" type="email" placeholder="you@example.com" autocomplete="email"></div>
-        <div class="fg"><label class="fl">Password</label><input class="fi" id="pw" type="password" placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly')"></div>
-        <button class="btn btn-primary" id="login-btn">Sign in</button>
-      </div>
-    </div>`
-  document.getElementById('back-btn').onclick = () => go('')
-  document.getElementById('em').focus()
+  // Build login form using DOM (not innerHTML) so inputs are never serialised as strings
+  app.innerHTML = ''
+  const wrap = document.createElement('div'); wrap.className = 'auth-wrap'
+  const card = document.createElement('div'); card.className = 'auth-card'
+
+  const backBtn = document.createElement('button'); backBtn.className = 'auth-back'
+  backBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back to home'
+  backBtn.onclick = () => go('')
+
+  const logoEl = document.createElement('div'); logoEl.className = 'auth-logo'; logoEl.textContent = 'SlideLoop'
+  const subEl  = document.createElement('div'); subEl.className  = 'auth-sub';  subEl.textContent  = 'Sign in to manage your slideshow'
+  const errEl  = document.createElement('div'); errEl.id = 'login-err'
+
+  const emGroup = document.createElement('div'); emGroup.className = 'fg'
+  const emLabel = document.createElement('label'); emLabel.className = 'fl'; emLabel.textContent = 'Email'
+  const emInput = document.createElement('input')
+  emInput.className = 'fi'; emInput.type = 'email'; emInput.placeholder = 'you@example.com'
+  emGroup.appendChild(emLabel); emGroup.appendChild(emInput)
+
+  const pwGroup = document.createElement('div'); pwGroup.className = 'fg'
+  const pwLabel = document.createElement('label'); pwLabel.className = 'fl'; pwLabel.textContent = 'Password'
+  const pwInput = document.createElement('input')
+  pwInput.className = 'fi'; pwInput.type = 'password'; pwInput.placeholder = '••••••••'
+  pwGroup.appendChild(pwLabel); pwGroup.appendChild(pwInput)
+
+  const signBtn = document.createElement('button'); signBtn.className = 'btn btn-primary'; signBtn.textContent = 'Sign in'
+
+  card.appendChild(backBtn); card.appendChild(logoEl); card.appendChild(subEl)
+  card.appendChild(errEl);   card.appendChild(emGroup); card.appendChild(pwGroup)
+  card.appendChild(signBtn); wrap.appendChild(card); app.appendChild(wrap)
+
   const submit = async () => {
-    const btn = document.getElementById('login-btn')
-    btn.disabled = true; btn.textContent = 'Signing in…'
-    document.getElementById('login-err').innerHTML = ''
+    signBtn.disabled = true; signBtn.textContent = 'Signing in…'
+    errEl.innerHTML = ''
     const { error } = await db.auth.signInWithPassword({
-      email: document.getElementById('em').value.trim(),
-      password: document.getElementById('pw').value
+      email: emInput.value.trim(),
+      password: pwInput.value
     })
     if (error) {
-      document.getElementById('login-err').innerHTML = `<div class="errbox">${error.message}</div>`
-      btn.disabled = false; btn.textContent = 'Sign in'
+      errEl.innerHTML = `<div class="errbox">${error.message}</div>`
+      signBtn.disabled = false; signBtn.textContent = 'Sign in'
     } else { go('admin') }
   }
-  document.getElementById('login-btn').onclick = submit
-  document.getElementById('pw').onkeydown = e => e.key === 'Enter' && submit()
+  signBtn.onclick = submit
+  pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit() })
 }
 
 // ── ADMIN ────────────────────────────────────────────────────
