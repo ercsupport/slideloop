@@ -494,23 +494,23 @@ async function renderAdmin() {
       tab.className = `pl-tab${pl.id === selectedPl?.id ? ' sel' : ''}`
       tab.textContent = pl.name
       tab.onclick = async () => { selectedPl = pl; await loadSlides(); drawPlaylistTabs(); drawSlides() }
-      if (playlists.length > 1) {
-        const del = document.createElement('button'); del.className = 'pl-tab-del'; del.textContent = '×'
-        del.onclick = async e => {
-          e.stopPropagation()
-          if (!confirm(`Delete playlist "${pl.name}" and all its slides?`)) return
-          const { data: ss } = await db.from('slides').select('storage_path').eq('playlist_id', pl.id)
-          const paths = (ss||[]).map(s=>s.storage_path).filter(Boolean)
-          if (paths.length) await db.storage.from('slideloop').remove(paths)
-          await db.from('slides').delete().eq('playlist_id', pl.id)
-          await db.from('playlists').delete().eq('id', pl.id)
-          playlists = playlists.filter(x=>x.id!==pl.id)
-          if (selectedPl?.id === pl.id) selectedPl = playlists[0]
-          await loadSlides(); drawPlaylistTabs(); drawSlides()
-          toast('Playlist deleted')
-        }
-        tab.appendChild(del)
+      const del = document.createElement('button'); del.className = 'pl-tab-del'; del.textContent = '×'
+      del.onclick = async e => {
+        e.stopPropagation()
+        if (!confirm(`Delete playlist "${pl.name}" and all its slides?`)) return
+        const { data: ss } = await db.from('slides').select('storage_path').eq('playlist_id', pl.id)
+        const paths = (ss||[]).map(s=>s.storage_path).filter(Boolean)
+        if (paths.length) await db.storage.from('slideloop').remove(paths)
+        await db.from('slides').delete().eq('playlist_id', pl.id)
+        await db.from('playlists').delete().eq('id', pl.id)
+        playlists = playlists.filter(x=>x.id!==pl.id)
+        if (selectedPl?.id === pl.id) selectedPl = playlists[0] || null
+        slides = []
+        await loadSlides()
+        drawPlaylistTabs(); drawSlides(); drawDisplays()
+        toast('Playlist deleted')
       }
+      tab.appendChild(del)
       tabs.appendChild(tab)
     })
 
@@ -520,7 +520,7 @@ async function renderAdmin() {
     addBtn.onclick = async () => {
       const name = prompt('Playlist name:'); if (!name?.trim()) return
       const { data: p } = await db.from('playlists').insert({ name:name.trim() }).select().single()
-      if (p) { playlists.push(p); selectedPl = p; await loadSlides(); drawPlaylistTabs(); drawSlides() }
+      if (p) { playlists.push(p); selectedPl = p; await loadSlides(); drawPlaylistTabs(); drawSlides(); drawDisplays() }
     }
     tabs.appendChild(addBtn)
 
@@ -530,6 +530,8 @@ async function renderAdmin() {
     const upBtn = document.createElement('button'); upBtn.className = 'btn btn-primary'; upBtn.style.width = 'auto'
     upBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg> Upload Slides`
     upBtn.onclick = openUpload
+    upBtn.disabled = !selectedPl
+    if (!selectedPl) upBtn.style.opacity = '.4'
     bar.appendChild(titleEl); bar.appendChild(upBtn)
 
     area.appendChild(tabs); area.appendChild(bar)
@@ -539,6 +541,10 @@ async function renderAdmin() {
   function drawSlides() {
     const ct = document.getElementById('slide-count'); if (ct) ct.textContent = `${slides.length} item${slides.length!==1?'s':''}`
     const area = document.getElementById('slides-area'); if (!area) return
+    if (!selectedPl) {
+      area.innerHTML = `<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;opacity:.3">📋</div><div style="font-size:15px;font-weight:500;color:var(--dim);margin-bottom:4px">No playlists yet</div><div style="font-size:13px;color:var(--muted)">Click "+ New" above to create your first playlist</div></div>`
+      return
+    }
     if (!slides.length) {
       area.innerHTML = `<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;opacity:.3">🎞️</div><div style="font-size:15px;font-weight:500;color:var(--dim);margin-bottom:4px">No slides in this playlist</div><div style="font-size:13px;color:var(--muted)">Click Upload Slides to add some</div></div>`
       return
