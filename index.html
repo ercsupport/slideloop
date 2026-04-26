@@ -283,7 +283,7 @@ function renderHome() {
 // DISPLAY PICKER
 // ─────────────────────────────────────────────────────────────
 async function renderDisplayPicker() {
-  app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div></div>`
+  app.innerHTML = `<div class="d-load"><div class="d-logo" style="cursor:pointer" onclick="location.hash=''">SlideLoop</div><div class="spin"></div></div>`
   const { data: displays } = await db.from('displays').select('*, playlists(name)').order('created_at')
 
   app.innerHTML = ''
@@ -295,7 +295,7 @@ async function renderDisplayPicker() {
   back.onclick = () => go('')
 
   const inner = document.createElement('div'); inner.className = 'page-inner'
-  const logo  = document.createElement('div'); logo.className  = 'logo-sm';  logo.textContent = 'SlideLoop'
+  const logo  = document.createElement('div'); logo.className  = 'logo-sm';  logo.textContent = 'SlideLoop'; logo.style.cursor='pointer'; logo.onclick=()=>go('')
   const sub   = document.createElement('div'); sub.className   = 'tagline';  sub.textContent  = 'Choose a display'
   const grid  = document.createElement('div'); grid.className  = 'picker-grid'
 
@@ -342,7 +342,7 @@ function renderLogin() {
   const backBtn = document.createElement('button'); backBtn.className = 'auth-back'
   backBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back`
   backBtn.onclick = () => go('')
-  const logoEl = document.createElement('div'); logoEl.className = 'auth-logo'; logoEl.textContent = 'SlideLoop'
+  const logoEl = document.createElement('div'); logoEl.className = 'auth-logo'; logoEl.textContent = 'SlideLoop'; logoEl.style.cursor='pointer'; logoEl.onclick=()=>go('')
   const subEl  = document.createElement('div'); subEl.className  = 'auth-sub';  subEl.textContent  = 'Sign in to manage your slideshow'
   const errEl  = document.createElement('div')
   const emGroup = document.createElement('div'); emGroup.className = 'fg'
@@ -374,6 +374,36 @@ async function renderAdmin() {
   const { data: { session } } = await db.auth.getSession()
   if (!session) { go('admin/login'); return }
 
+  // ─── Auto-logout: 5 min inactivity + on tab close ───
+  let idleTimer = null
+  const IDLE_MS = 5 * 60 * 1000  // 5 minutes
+  const resetIdle = () => {
+    clearTimeout(idleTimer)
+    idleTimer = setTimeout(async () => {
+      await db.auth.signOut()
+      toast('Logged out due to inactivity', false)
+      go('')
+    }, IDLE_MS)
+  }
+  ;['mousemove','mousedown','keydown','touchstart','scroll'].forEach(ev => {
+    window.addEventListener(ev, resetIdle, { passive:true })
+  })
+  resetIdle()
+  // Logout when tab closes for safety
+  const onBeforeUnload = () => { db.auth.signOut() }
+  window.addEventListener('beforeunload', onBeforeUnload)
+  // Cleanup on route change
+  const prevTeardown = teardown
+  teardown = () => {
+    clearTimeout(idleTimer)
+    ;['mousemove','mousedown','keydown','touchstart','scroll'].forEach(ev => {
+      window.removeEventListener(ev, resetIdle)
+    })
+    window.removeEventListener('beforeunload', onBeforeUnload)
+    prevTeardown?.()
+  }
+  // ─── End auto-logout ───
+
   let playlists = [], slides = [], selectedPl = null, displays = []
   let cfg = { default_duration_ms:8000, transition:'fade', show_progress:true, auto_loop:true }
 
@@ -398,7 +428,7 @@ async function renderAdmin() {
     <div class="admin-wrap">
       <header class="admin-hdr">
         <div style="display:flex;align-items:center;gap:11px">
-          <span class="admin-logo">SlideLoop</span>
+          <span class="admin-logo" id="admin-logo" style="cursor:pointer">SlideLoop</span>
           <span class="a-badge">Admin</span>
         </div>
         <div style="display:flex;gap:8px">
@@ -455,6 +485,7 @@ async function renderAdmin() {
       </div>
     </div>`
 
+  document.getElementById('admin-logo').onclick = () => go('')
   document.getElementById('btn-preview').onclick = () => go('displays')
   document.getElementById('btn-logout').onclick  = async () => { await db.auth.signOut(); go('') }
   document.getElementById('cfg-prog').onclick = function() { this.classList.toggle('on') }
@@ -768,7 +799,7 @@ async function renderAdmin() {
 // DISPLAY  — clean, reliable, synced
 // ─────────────────────────────────────────────────────────────
 async function renderDisplay(displayId) {
-  app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div><div style="font-size:13px;color:rgba(255,255,255,.3)">Loading…</div></div>`
+  app.innerHTML = `<div class="d-load"><div class="d-logo" style="cursor:pointer" onclick="location.hash=''">SlideLoop</div><div class="spin"></div><div style="font-size:13px;color:rgba(255,255,255,.3)">Loading…</div></div>`
 
   // Load display, its playlist slides, settings, and existing sync state
   const [rDisp, rCfg, rSync] = await Promise.all([
@@ -784,7 +815,7 @@ async function renderDisplay(displayId) {
   if (!disp || !disp.is_online) {
     app.innerHTML = `
       <div class="d-offline">
-        <div class="d-logo" style="margin-bottom:12px">SlideLoop</div>
+        <div class="d-logo" style="margin-bottom:12px;cursor:pointer" onclick="location.hash=''">SlideLoop</div>
         <div style="font-size:22px;margin-bottom:8px">📴</div>
         <div style="font-size:16px;color:rgba(255,255,255,.35)">${disp?.name || 'This display'} is currently offline</div>
         <div style="font-size:13px;color:rgba(255,255,255,.2);margin-top:6px">Ask your admin to turn it on</div>
@@ -794,7 +825,7 @@ async function renderDisplay(displayId) {
   }
 
   if (!disp.playlist_id) {
-    app.innerHTML = `<div class="d-empty"><div class="d-logo">SlideLoop</div><div style="font-size:14px">No playlist assigned to this display</div><button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button></div>`
+    app.innerHTML = `<div class="d-empty"><div class="d-logo" style="cursor:pointer" onclick="location.hash=''">SlideLoop</div><div style="font-size:14px">No playlist assigned to this display</div><button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button></div>`
     return
   }
 
@@ -802,7 +833,7 @@ async function renderDisplay(displayId) {
   const items = expandSlides(rawSlides || [])
 
   if (!items.length) {
-    app.innerHTML = `<div class="d-empty"><div class="d-logo">SlideLoop</div><div style="font-size:14px">No slides in this playlist</div><button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button></div>`
+    app.innerHTML = `<div class="d-empty"><div class="d-logo" style="cursor:pointer" onclick="location.hash=''">SlideLoop</div><div style="font-size:14px">No slides in this playlist</div><button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button></div>`
     return
   }
 
