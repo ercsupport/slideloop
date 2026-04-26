@@ -178,6 +178,7 @@ select.si{cursor:pointer}
 
 /* ── DISPLAY ── */
 .disp{width:100vw;height:100vh;background:#000;position:relative;overflow:hidden}
+.disp ~ .footer,body:has(.disp) .footer{display:none}
 .disp:not(.ui-vis){cursor:none}
 .dslide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .7s ease;pointer-events:none}
 .dslide.active{opacity:1;pointer-events:auto}
@@ -197,6 +198,8 @@ select.si{cursor:pointer}
 .d-offline{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:rgba(255,255,255,.25)}
 
 /* ── TOAST ── */
+.footer{position:fixed;bottom:16px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,.4);font-weight:400;letter-spacing:.04em;pointer-events:none;z-index:50}
+.footer span{color:rgba(255,255,255,.7);font-weight:600;background:linear-gradient(135deg,#d4a84b,#8b6fc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 #toasts{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
 .toast{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideUp .2s ease}
 
@@ -207,6 +210,7 @@ select.si{cursor:pointer}
 </head>
 <body>
 <div id="app"></div>
+<div class="footer">Made by <span>Marek</span></div>
 <div id="toasts"></div>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
@@ -412,7 +416,7 @@ async function renderAdmin() {
     db.from('settings').select('*').eq('id',1).single(),
     db.from('displays').select('*').order('created_at')
   ])
-  if (rPl.data?.length) { playlists = rPl.data; selectedPl = playlists[0] }
+  if (rPl.data?.length) { playlists = rPl.data }
   if (rCfg.data) cfg = rCfg.data
   if (rDisp.data) displays = rDisp.data
 
@@ -570,10 +574,14 @@ async function renderAdmin() {
 
   // ── SLIDES ─────────────────────────────────────────────────
   function drawSlides() {
-    const ct = document.getElementById('slide-count'); if (ct) ct.textContent = `${slides.length} item${slides.length!==1?'s':''}`
+    const ct = document.getElementById('slide-count'); if (ct) ct.textContent = selectedPl ? `${slides.length} item${slides.length!==1?'s':''}` : ''
     const area = document.getElementById('slides-area'); if (!area) return
     if (!selectedPl) {
-      area.innerHTML = `<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;opacity:.3">📋</div><div style="font-size:15px;font-weight:500;color:var(--dim);margin-bottom:4px">No playlists yet</div><div style="font-size:13px;color:var(--muted)">Click "+ New" above to create your first playlist</div></div>`
+      if (!playlists.length) {
+        area.innerHTML = `<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;opacity:.3">📋</div><div style="font-size:15px;font-weight:500;color:var(--dim);margin-bottom:4px">No playlists yet</div><div style="font-size:13px;color:var(--muted)">Click "+ New" above to create your first playlist</div></div>`
+      } else {
+        area.innerHTML = `<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;opacity:.3">👆</div><div style="font-size:15px;font-weight:500;color:var(--dim);margin-bottom:4px">Select a playlist</div><div style="font-size:13px;color:var(--muted)">Click a playlist above to view and edit its slides</div></div>`
+      }
       return
     }
     if (!slides.length) {
