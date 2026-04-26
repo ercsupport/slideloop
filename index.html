@@ -185,7 +185,7 @@ select.si{cursor:pointer}
 .dslide-bg{position:absolute;inset:-30px;background-size:cover;background-position:center;filter:blur(20px) brightness(.3);z-index:0}
 .dslide img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;z-index:1;user-select:none}
 .dslide canvas{max-width:100%;max-height:100%;display:block;z-index:1;position:relative}
-.dslide iframe{width:100vw;height:100vh;border:none;z-index:1;position:relative}
+
 .d-prog{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#c9a84c,#7c5cbf);z-index:20}
 .d-ui{position:fixed;bottom:0;left:0;right:0;padding:20px 28px;background:linear-gradient(transparent,rgba(0,0,0,.55));display:flex;align-items:flex-end;justify-content:space-between;z-index:10;opacity:0;transition:opacity .3s}
 .ui-vis .d-ui{opacity:1}
@@ -748,8 +748,8 @@ async function renderAdmin() {
       const title = document.createElement('div'); title.className='modal-title'; title.textContent=`Upload to "${selectedPl.name}"`
       modal.appendChild(title)
       const dz = document.createElement('div'); dz.className='dropzone'
-      dz.innerHTML=`<div style="font-size:28px;margin-bottom:8px">📁</div><div style="font-size:14px;font-weight:500;margin-bottom:3px">Drop files here or click to browse</div><div style="font-size:12px;color:var(--muted)">Images · PDF · PowerPoint — select multiple</div>`
-      const fIn=document.createElement('input'); fIn.type='file'; fIn.multiple=true; fIn.accept='.jpg,.jpeg,.png,.gif,.webp,.pdf,.pptx,.ppt'; fIn.style.display='none'
+      dz.innerHTML=`<div style="font-size:28px;margin-bottom:8px">📁</div><div style="font-size:14px;font-weight:500;margin-bottom:3px">Drop files here or click to browse</div><div style="font-size:12px;color:var(--muted)">Images (JPG, PNG, GIF, WebP) · PDF — select multiple</div>`
+      const fIn=document.createElement('input'); fIn.type='file'; fIn.multiple=true; fIn.accept='.jpg,.jpeg,.png,.gif,.webp,.pdf'; fIn.style.display='none'
       dz.appendChild(fIn); dz.onclick=()=>fIn.click()
       dz.ondragover=e=>{e.preventDefault();dz.classList.add('dz-over')}; dz.ondragleave=()=>dz.classList.remove('dz-over')
       dz.ondrop=e=>{e.preventDefault();dz.classList.remove('dz-over');addFiles(e.dataTransfer.files)}
@@ -760,7 +760,7 @@ async function renderAdmin() {
         const ql=document.createElement('div'); ql.className='queue-list'
         queue.forEach((item,i)=>{
           const row=document.createElement('div'); row.className='q-item'
-          const icon={pdf:'📄',pptx:'📊',image:'🖼️'}[fileType(item.f.name)]
+          const icon={pdf:'📄',image:'🖼️'}[fileType(item.f.name)]
           const sc=item.s==='done'?'done':item.s==='error'?'err':item.s==='uploading'?'uploading':''
           const st=item.s==='done'?'✓ Done':item.s==='error'?'✕ Failed':item.s==='uploading'?'Uploading…':'Pending'
           row.innerHTML=`<span class="q-icon">${icon}</span><span class="q-name">${item.f.name}</span><span class="q-status ${sc}">${st}</span>`
@@ -784,7 +784,15 @@ async function renderAdmin() {
       acts.appendChild(cancelBtn);acts.appendChild(upBtn);modal.appendChild(acts)
     }
 
-    function addFiles(fl) { Array.from(fl).forEach(f=>queue.push({f,s:'pending'})); render() }
+    function addFiles(fl) {
+      let blocked = 0
+      Array.from(fl).forEach(f => {
+        if (!fileType(f.name)) { blocked++; return }
+        queue.push({ f, s:'pending' })
+      })
+      if (blocked) toast(`${blocked} file${blocked!==1?'s':''} skipped — only images and PDFs are supported`, false)
+      render()
+    }
 
     async function doUpload(durI) {
       const durMs=+durI.value*1000
@@ -894,10 +902,6 @@ async function renderDisplay(displayId) {
       const img = new Image(); img.src = item.file_url; img.draggable = false; el.appendChild(img)
     } else if (item.file_type === 'pdf') {
       renderPdfPage(item, el)
-    } else {
-      const fr = document.createElement('iframe')
-      fr.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.file_url)}`
-      fr.allowFullscreen = true; el.appendChild(fr)
     }
   }
 
@@ -1064,7 +1068,9 @@ function expandSlides(slides) {
 }
 function fileType(name) {
   const n = name.toLowerCase()
-  return n.endsWith('.pdf')?'pdf':(n.endsWith('.pptx')||n.endsWith('.ppt'))?'pptx':'image'
+  if (n.endsWith('.pdf')) return 'pdf'
+  if (n.match(/\.(jpe?g|png|gif|webp)$/)) return 'image'
+  return null  // unsupported (e.g. .pptx, .ppt, .doc, etc.)
 }
 </script>
 </body>
