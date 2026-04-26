@@ -393,9 +393,18 @@ async function renderAdmin() {
     window.addEventListener(ev, resetIdle, { passive:true })
   })
   resetIdle()
-  // Logout when tab closes for safety
-  const onBeforeUnload = () => { db.auth.signOut() }
-  window.addEventListener('beforeunload', onBeforeUnload)
+  // Logout when tab/window closes — clear session synchronously from localStorage
+  // (network calls in unload events are unreliable, but localStorage writes always complete)
+  const onUnload = () => {
+    try {
+      // Supabase stores the session under a key like "sb-<project-ref>-auth-token"
+      Object.keys(localStorage).forEach(k => {
+        if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k)
+      })
+    } catch(_) {}
+  }
+  window.addEventListener('pagehide', onUnload)
+  window.addEventListener('beforeunload', onUnload)
   // Cleanup on route change
   const prevTeardown = teardown
   teardown = () => {
@@ -403,7 +412,8 @@ async function renderAdmin() {
     ;['mousemove','mousedown','keydown','touchstart','scroll'].forEach(ev => {
       window.removeEventListener(ev, resetIdle)
     })
-    window.removeEventListener('beforeunload', onBeforeUnload)
+    window.removeEventListener('pagehide', onUnload)
+    window.removeEventListener('beforeunload', onUnload)
     prevTeardown?.()
   }
   // ─── End auto-logout ───
