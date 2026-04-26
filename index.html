@@ -11,7 +11,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#080910;--bg2:#0f111a;--bg3:#141627;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
   --text:#e8e9f0;--muted:#6b6e85;--dim:#9294a8;
   --blue:#3d5af1;--danger:#e05252;--green:#4caf7d;
   --r:16px;--r2:10px;
@@ -22,28 +22,45 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--f
 #app{min-height:100%}
 button{font-family:var(--ff);cursor:pointer;border:none;outline:none}
 input,select{font-family:var(--ff);outline:none}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:3px}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
 
-/* HOME */
-.home{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden}
-.home-bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 80% 90%,rgba(180,120,20,.13),transparent 60%),radial-gradient(ellipse 50% 40% at 20% 10%,rgba(60,40,120,.08),transparent 50%),#080910;pointer-events:none}
-.home-inner{position:relative;z-index:1;text-align:center;max-width:820px;width:100%}
+/* ── HOME / PICKER ── */
+.page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden}
+.page-bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 80% 90%,rgba(180,120,20,.13),transparent 60%),radial-gradient(ellipse 50% 40% at 20% 10%,rgba(60,40,120,.08),transparent 50%),#080910;pointer-events:none}
+.page-inner{position:relative;z-index:1;text-align:center;max-width:900px;width:100%}
 .logo{font-family:var(--fd);font-size:clamp(52px,10vw,96px);font-weight:800;letter-spacing:-2px;line-height:1;margin-bottom:14px;background:linear-gradient(135deg,#d4a84b 0%,#c8a24a 25%,#b89fca 65%,#8b6fc4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.tagline{font-size:16px;color:var(--muted);font-weight:300;margin-bottom:60px}
+.logo-sm{font-family:var(--fd);font-size:clamp(32px,5vw,52px);font-weight:800;letter-spacing:-1px;margin-bottom:10px;background:linear-gradient(135deg,#d4a84b,#8b6fc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tagline{font-size:16px;color:var(--muted);font-weight:300;margin-bottom:56px}
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px;margin:0 auto}
-@media(max-width:580px){.cards{grid-template-columns:1fr}}
+@media(max-width:580px){.cards,.picker-grid{grid-template-columns:1fr}}
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:32px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s;text-align:left;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(ellipse at 30% 0%,rgba(255,255,255,.03),transparent 70%);pointer-events:none}
+.card::before,.picker-card::before{content:'';position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(ellipse at 30% 0%,rgba(255,255,255,.03),transparent 70%);pointer-events:none}
 .card:hover{background:var(--bg3);border-color:var(--border2);transform:translateY(-2px)}
 .card-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:24px}
 .card-icon.play{background:rgba(180,120,20,.15);color:#c9a84c}
 .card-icon.gear{background:rgba(61,90,241,.15);color:#6b8df5}
 .card-title{font-family:var(--fd);font-size:26px;font-weight:700;margin-bottom:10px}
 .card-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px;font-weight:300}
-.card-arrow{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;float:right;color:var(--dim);transition:background .2s,color .2s}
-.card:hover .card-arrow{background:rgba(255,255,255,.1);color:var(--text)}
+.card-arrow{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;float:right;color:var(--dim);transition:background .2s}
+.card:hover .card-arrow,.picker-card:hover .picker-card-arrow{background:rgba(255,255,255,.1);color:var(--text)}
+/* Picker */
+.picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;text-align:left}
+.picker-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:26px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s;position:relative;overflow:hidden}
+.picker-card:hover{background:var(--bg3);border-color:var(--border2);transform:translateY(-2px)}
+.picker-card.offline{opacity:.45;cursor:not-allowed}
+.picker-card.offline:hover{transform:none;background:var(--bg2)}
+.picker-card-top{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.picker-card-icon{width:40px;height:40px;border-radius:10px;background:rgba(180,120,20,.15);color:#c9a84c;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.picker-card-name{font-family:var(--fd);font-size:18px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.picker-card-pl{font-size:13px;color:var(--muted);margin-bottom:16px;font-weight:300}
+.picker-card-status{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;flex-shrink:0}
+.offline-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.back-btn{position:absolute;top:24px;left:24px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;background:none;transition:color .2s;z-index:2;border:none}
+.back-btn:hover{color:var(--text)}
 
-/* AUTH */
+/* ── AUTH ── */
 .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(61,90,241,.06),transparent 70%) var(--bg)}
 .auth-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:48px;width:100%;max-width:420px;position:relative}
 .auth-back{position:absolute;top:-44px;left:0;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;background:none;transition:color .2s}
@@ -57,7 +74,7 @@ input,select{font-family:var(--ff);outline:none}
 .fi::placeholder{color:var(--muted)}
 .errbox{background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.2);border-radius:8px;padding:10px 14px;font-size:13px;color:#e07070;margin-bottom:16px}
 
-/* BUTTONS */
+/* ── BUTTONS ── */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 18px;border-radius:var(--r2);font-size:14px;font-weight:500;cursor:pointer;border:none;transition:all .2s;white-space:nowrap}
 .btn-primary{background:linear-gradient(135deg,#3d5af1,#5a3db5);color:#fff;width:100%;padding:14px;font-size:15px}
 .btn-primary:hover:not(:disabled){opacity:.9;transform:translateY(-1px)}
@@ -66,38 +83,32 @@ input,select{font-family:var(--ff);outline:none}
 .btn-ghost:hover{background:rgba(255,255,255,.08);color:var(--text)}
 .btn-danger{background:rgba(224,82,82,.1);border:1px solid rgba(224,82,82,.2);color:#e07070}
 .btn-danger:hover{background:rgba(224,82,82,.2)}
-.btn-green{background:rgba(76,175,125,.12);border:1px solid rgba(76,175,125,.25);color:#4caf7d}
-.btn-green:hover{background:rgba(76,175,125,.2)}
 .btn-sm{padding:6px 11px;font-size:12px;border-radius:7px}
 .btn-ic{width:32px;height:32px;padding:0;border-radius:7px}
 
-/* ADMIN */
+/* ── ADMIN ── */
 .admin-wrap{min-height:100vh;display:grid;grid-template-rows:auto 1fr;background:var(--bg)}
-.admin-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);background:rgba(8,9,16,.88);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
+.admin-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);background:rgba(8,9,16,.9);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100}
 .admin-logo{font-family:var(--fd);font-size:20px;font-weight:800;background:linear-gradient(135deg,#d4a84b,#8b6fc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .a-badge{background:rgba(61,90,241,.15);border:1px solid rgba(61,90,241,.25);color:#7898f8;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;letter-spacing:.05em;text-transform:uppercase}
-.admin-body{display:grid;grid-template-columns:1fr 300px;height:calc(100vh - 63px);overflow:hidden}
+.admin-body{display:grid;grid-template-columns:1fr 310px;height:calc(100vh - 63px);overflow:hidden}
 @media(max-width:820px){.admin-body{grid-template-columns:1fr;height:auto;overflow:visible}}
 .admin-main{padding:28px;overflow-y:auto}
 .admin-side{border-left:1px solid var(--border);padding:24px;overflow-y:auto;background:rgba(255,255,255,.01)}
 .sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:14px}
+.divider{border:none;border-top:1px solid var(--border);margin:22px 0}
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.toolbar-title{font-size:19px;font-weight:600}
 
-/* PLAYLISTS */
+/* ── PLAYLIST TABS ── */
 .pl-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
 .pl-tab{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg2);color:var(--dim);transition:all .2s}
 .pl-tab:hover{border-color:var(--border2);color:var(--text)}
-.pl-tab.active{background:rgba(61,90,241,.12);border-color:rgba(61,90,241,.35);color:var(--text)}
-.pl-tab.live-tab{background:rgba(76,175,125,.08);border-color:rgba(76,175,125,.3);color:var(--green)}
-.pl-tab.active.live-tab{background:rgba(76,175,125,.15);border-color:rgba(76,175,125,.4)}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.pl-tab-del{background:none;color:var(--muted);font-size:14px;line-height:1;margin-left:2px;padding:0 2px;border-radius:3px}
+.pl-tab.sel{background:rgba(61,90,241,.12);border-color:rgba(61,90,241,.35);color:var(--text)}
+.pl-tab-del{background:none;color:var(--muted);font-size:14px;line-height:1;margin-left:2px;padding:0 2px}
 .pl-tab-del:hover{color:var(--danger)}
 .pl-bar{display:flex;align-items:center;gap:8px;margin-bottom:22px}
 
-/* SLIDES */
+/* ── SLIDES ── */
 .slides-list{display:flex;flex-direction:column;gap:8px}
 .slide-row{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:12px 14px;display:grid;grid-template-columns:22px 54px 1fr auto;align-items:center;gap:12px;transition:background .2s,border-color .2s}
 .slide-row:hover{background:var(--bg3);border-color:var(--border2)}
@@ -118,8 +129,8 @@ input,select{font-family:var(--ff);outline:none}
 .dur-in:focus{border-color:rgba(61,90,241,.4)}
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:72px 24px;text-align:center;border:2px dashed var(--border);border-radius:var(--r)}
 
-/* SETTINGS SIDEBAR */
-.sblock{margin-bottom:22px}
+/* ── SETTINGS SIDEBAR ── */
+.sblock{margin-bottom:20px}
 .slabel{font-size:12px;font-weight:500;color:var(--dim);margin-bottom:8px}
 .srow{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;margin-bottom:7px}
 .srl{font-size:13px;color:var(--dim)}
@@ -130,11 +141,22 @@ select.si{cursor:pointer}
 .tgl.on{background:var(--blue)}
 .tgl::after{content:'';position:absolute;top:2.5px;left:2.5px;width:14px;height:14px;background:#fff;border-radius:50%;transition:transform .2s}
 .tgl.on::after{transform:translateX(15px)}
-.help-box{margin-top:22px;padding:13px;background:rgba(255,255,255,.02);border-radius:10px;border:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.8}
+.help-box{margin-top:20px;padding:13px;background:rgba(255,255,255,.02);border-radius:10px;border:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.8}
 .help-box b{color:var(--dim);display:block;margin-bottom:3px}
-.divider{border:none;border-top:1px solid var(--border);margin:22px 0}
 
-/* MODAL */
+/* ── DISPLAYS (ADMIN SIDEBAR) ── */
+.disp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.disp-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:12px 13px}
+.disp-item-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.disp-name-in{background:#0d0f1c;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:13px;font-weight:600;flex:1;min-width:0}
+.disp-name-in:focus{border-color:rgba(61,90,241,.4)}
+.disp-pl-row{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.disp-pl-label{font-size:11px;color:var(--muted);flex-shrink:0}
+.disp-pl-sel{flex:1;min-width:0;font-size:12px}
+.disp-status-row{display:flex;align-items:center;justify-content:space-between}
+.disp-status-label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+
+/* ── MODAL ── */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .15s ease}
 .modal{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:34px;width:100%;max-width:520px;animation:slideUp .2s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto}
 .modal-title{font-size:17px;font-weight:600;margin-bottom:22px}
@@ -143,65 +165,44 @@ select.si{cursor:pointer}
 .dropzone:hover,.dropzone.dz-over{border-color:rgba(61,90,241,.5);background:rgba(61,90,241,.04)}
 .queue-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;max-height:200px;overflow-y:auto}
 .q-item{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.04);border-radius:8px;padding:8px 12px;font-size:13px}
-.q-item-icon{font-size:18px;flex-shrink:0}
-.q-item-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.q-item-status{font-size:11px;color:var(--muted);flex-shrink:0}
-.q-item-status.done{color:var(--green)}
-.q-item-status.err{color:var(--danger)}
-.q-item-status.uploading{color:#7898f8}
-.q-remove{background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0 3px}
+.q-icon{font-size:18px;flex-shrink:0}
+.q-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-status{font-size:11px;color:var(--muted);flex-shrink:0}
+.q-status.done{color:var(--green)}
+.q-status.err{color:var(--danger)}
+.q-status.uploading{color:#7898f8}
+.q-rm{background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0 3px}
 .prog-wrap{margin-top:10px}
 .prog-bar{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-top:5px}
-.prog-fill{height:100%;background:linear-gradient(90deg,#3d5af1,#7c5cbf);border-radius:2px;transition:width .3s ease;width:0%}
+.prog-fill{height:100%;background:linear-gradient(90deg,#3d5af1,#7c5cbf);border-radius:2px;transition:width .3s;width:0%}
 
-/* DISPLAY */
+/* ── DISPLAY ── */
 .disp{width:100vw;height:100vh;background:#000;position:relative;overflow:hidden}
 .disp:not(.ui-vis){cursor:none}
-.dslide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .75s ease;pointer-events:none}.dslide-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(18px) brightness(0.35);transform:scale(1.1);z-index:0}
+.dslide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .7s ease;pointer-events:none}
 .dslide.active{opacity:1;pointer-events:auto}
-.dslide img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;user-select:none;-webkit-user-drag:none;z-index:1}
-.dslide canvas{max-width:100%;max-height:100%;display:block;object-fit:contain}
-.dslide iframe{width:100vw;height:100vh;border:none}
-.d-prog{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#c9a84c,#7c5cbf);z-index:20;transition:width .1s linear}
+.dslide-bg{position:absolute;inset:-30px;background-size:cover;background-position:center;filter:blur(20px) brightness(.3);z-index:0}
+.dslide img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;z-index:1;user-select:none}
+.dslide canvas{max-width:100%;max-height:100%;display:block;z-index:1;position:relative}
+.dslide iframe{width:100vw;height:100vh;border:none;z-index:1;position:relative}
+.d-prog{position:fixed;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#c9a84c,#7c5cbf);z-index:20}
 .d-ui{position:fixed;bottom:0;left:0;right:0;padding:20px 28px;background:linear-gradient(transparent,rgba(0,0,0,.55));display:flex;align-items:flex-end;justify-content:space-between;z-index:10;opacity:0;transition:opacity .3s}
 .ui-vis .d-ui{opacity:1}
-.d-ctr{font-size:13px;color:rgba(255,255,255,.45);font-weight:300}
+.d-ctr{font-size:13px;color:rgba(255,255,255,.45)}
 .d-btn{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.8);display:flex;align-items:center;justify-content:center;transition:background .2s;backdrop-filter:blur(8px)}
 .d-btn:hover{background:rgba(255,255,255,.2)}
-.d-load{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
-.d-empty{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,.2);text-align:center}
+.d-load,.d-empty{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:rgba(255,255,255,.2);text-align:center}
 .d-logo{font-family:var(--fd);font-size:38px;font-weight:800;background:linear-gradient(135deg,#d4a84b,#8b6fc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .spin{width:22px;height:22px;border:2px solid rgba(255,255,255,.1);border-top-color:rgba(255,255,255,.4);border-radius:50%;animation:spin .7s linear infinite}
+.d-offline{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:rgba(255,255,255,.25)}
+
+/* ── TOAST ── */
+#toasts{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
+.toast{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideUp .2s ease}
+
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-#toasts{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
-.toast{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideUp .2s ease}
-/* DISPLAY PICKER */
-.picker{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;position:relative;overflow:hidden}
-.picker-bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 80% 90%,rgba(180,120,20,.13),transparent 60%),radial-gradient(ellipse 50% 40% at 20% 10%,rgba(60,40,120,.08),transparent 50%),#080910;pointer-events:none}
-.picker-inner{position:relative;z-index:1;text-align:center;max-width:900px;width:100%}
-.picker-logo{font-family:var(--fd);font-size:clamp(36px,6vw,64px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;background:linear-gradient(135deg,#d4a84b 0%,#c8a24a 25%,#b89fca 65%,#8b6fc4 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.picker-sub{font-size:15px;color:var(--muted);font-weight:300;margin-bottom:48px}
-.picker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;text-align:left}
-.picker-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;cursor:pointer;transition:background .2s,border-color .2s,transform .2s;position:relative;overflow:hidden}
-.picker-card::before{content:'';position:absolute;inset:0;border-radius:var(--r);background:radial-gradient(ellipse at 30% 0%,rgba(255,255,255,.03),transparent 70%);pointer-events:none}
-.picker-card:hover{background:var(--bg3);border-color:var(--border2);transform:translateY(-2px)}
-.picker-card-icon{width:44px;height:44px;border-radius:10px;background:rgba(180,120,20,.15);color:#c9a84c;display:flex;align-items:center;justify-content:center;margin-bottom:18px}
-.picker-card-name{font-family:var(--fd);font-size:20px;font-weight:700;margin-bottom:5px}
-.picker-card-playlist{font-size:13px;color:var(--muted);font-weight:300}
-.picker-card-arrow{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;float:right;color:var(--dim);margin-top:18px;transition:background .2s}
-.picker-card:hover .picker-card-arrow{background:rgba(255,255,255,.1);color:var(--text)}
-.picker-back{position:absolute;top:24px;left:24px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;cursor:pointer;background:none;transition:color .2s;z-index:2}
-.picker-back:hover{color:var(--text)}
-.picker-empty{color:var(--muted);font-size:14px;padding:40px;text-align:center}
-/* DISPLAY MANAGEMENT IN ADMIN */
-.disp-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.disp-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:11px 13px}
-.disp-item-name{font-size:13px;font-weight:600;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between}
-.disp-item-row{display:flex;align-items:center;gap:6px;margin-top:5px}
-.disp-name-input{background:#0d0f1c;border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;font-weight:600;flex:1;min-width:0}
-.disp-name-input:focus{border-color:rgba(61,90,241,.4)}
 </style>
 </head>
 <body>
@@ -233,74 +234,128 @@ route()
 function route() {
   teardown?.(); teardown = null
   const h = location.hash.replace(/^#\/?/, '')
-  if      (h === 'displays')           renderDisplayPicker()
-  else if (h.startsWith('display/'))   renderDisplay(h.split('/')[1])
-  else if (h === 'admin')              renderAdmin()
-  else if (h === 'admin/login')        renderLogin()
-  else                                 renderHome()
+  if      (h === 'displays')          renderDisplayPicker()
+  else if (h.startsWith('display/'))  renderDisplay(h.slice(8))
+  else if (h === 'admin')             renderAdmin()
+  else if (h === 'admin/login')       renderLogin()
+  else                                renderHome()
 }
 
 const go = p => location.hash = p
 
 function toast(msg, ok = true) {
-  const el = document.createElement('div')
-  el.className = 'toast'
+  const el = document.createElement('div'); el.className = 'toast'
   el.innerHTML = `<span style="font-weight:700;color:${ok?'#4caf7d':'#e07070'}">${ok?'✓':'✕'}</span>${msg}`
   document.getElementById('toasts').appendChild(el)
   setTimeout(() => el.remove(), 3500)
 }
 
-// ── HOME ──────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// HOME
+// ─────────────────────────────────────────────────────────────
 function renderHome() {
   app.innerHTML = `
-    <div class="home"><div class="home-bg"></div>
-      <div class="home-inner">
+    <div class="page"><div class="page-bg"></div>
+      <div class="page-inner">
         <h1 class="logo">SlideLoop</h1>
         <p class="tagline">Infinite slideshow display — anywhere, any screen</p>
         <div class="cards">
-          <div class="card" id="c-display">
+          <div class="card" id="c-disp">
             <div class="card-icon play"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
             <h2 class="card-title">Display</h2>
-            <p class="card-desc">Launch the full-screen slideshow on this device. Perfect for your smart TV or any screen.</p>
+            <p class="card-desc">Launch a slideshow on this device. Choose from your configured displays.</p>
             <div class="card-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
           </div>
           <div class="card" id="c-admin">
             <div class="card-icon gear"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
             <h2 class="card-title">Admin</h2>
-            <p class="card-desc">Manage your slides, upload images and PDFs, reorder, and configure display settings.</p>
+            <p class="card-desc">Manage slides, playlists, displays, and settings.</p>
             <div class="card-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
           </div>
         </div>
       </div>
     </div>`
-  document.getElementById('c-display').onclick = () => go('displays')
-  document.getElementById('c-admin').onclick   = () => go('admin')
+  document.getElementById('c-disp').onclick  = () => go('displays')
+  document.getElementById('c-admin').onclick = () => go('admin')
 }
 
-// ── LOGIN ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// DISPLAY PICKER
+// ─────────────────────────────────────────────────────────────
+async function renderDisplayPicker() {
+  app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div></div>`
+  const { data: displays } = await db.from('displays').select('*, playlists(name)').order('created_at')
+
+  app.innerHTML = ''
+  const page = document.createElement('div'); page.className = 'page'
+  const bg   = document.createElement('div'); bg.className = 'page-bg'
+
+  const back = document.createElement('button'); back.className = 'back-btn'
+  back.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home`
+  back.onclick = () => go('')
+
+  const inner = document.createElement('div'); inner.className = 'page-inner'
+  const logo  = document.createElement('div'); logo.className  = 'logo-sm';  logo.textContent = 'SlideLoop'
+  const sub   = document.createElement('div'); sub.className   = 'tagline';  sub.textContent  = 'Choose a display'
+  const grid  = document.createElement('div'); grid.className  = 'picker-grid'
+
+  if (!displays?.length) {
+    grid.innerHTML = `<div style="color:var(--muted);font-size:14px;grid-column:1/-1;padding:40px;text-align:center">No displays set up yet.<br>Go to Admin → Displays to create one.</div>`
+  } else {
+    displays.forEach(d => {
+      const isOnline = !!d.is_online
+      const card = document.createElement('div')
+      card.className = `picker-card${isOnline ? '' : ' offline'}`
+      card.innerHTML = `
+        <div class="picker-card-top">
+          <div class="picker-card-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+          <div class="picker-card-name">${d.name}</div>
+        </div>
+        <div class="picker-card-pl">${d.playlists?.name || 'No playlist assigned'}</div>
+        <div class="picker-card-status">
+          ${isOnline ? '<div class="online-dot"></div><span style="color:var(--green)">Online</span>' : '<div class="offline-dot"></div><span>Offline</span>'}
+        </div>`
+      if (isOnline && d.playlist_id) {
+        card.onclick = () => go(`display/${d.id}`)
+      } else if (!isOnline) {
+        card.title = 'This display is currently offline'
+      } else {
+        card.title = 'No playlist assigned'
+        card.classList.add('offline')
+      }
+      grid.appendChild(card)
+    })
+  }
+
+  inner.appendChild(logo); inner.appendChild(sub); inner.appendChild(grid)
+  page.appendChild(bg); page.appendChild(back); page.appendChild(inner)
+  app.appendChild(page)
+}
+
+// ─────────────────────────────────────────────────────────────
+// LOGIN
+// ─────────────────────────────────────────────────────────────
 function renderLogin() {
   app.innerHTML = ''
   const wrap = document.createElement('div'); wrap.className = 'auth-wrap'
   const card = document.createElement('div'); card.className = 'auth-card'
   const backBtn = document.createElement('button'); backBtn.className = 'auth-back'
-  backBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back to home'
+  backBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back`
   backBtn.onclick = () => go('')
   const logoEl = document.createElement('div'); logoEl.className = 'auth-logo'; logoEl.textContent = 'SlideLoop'
   const subEl  = document.createElement('div'); subEl.className  = 'auth-sub';  subEl.textContent  = 'Sign in to manage your slideshow'
   const errEl  = document.createElement('div')
   const emGroup = document.createElement('div'); emGroup.className = 'fg'
   const emLabel = document.createElement('label'); emLabel.className = 'fl'; emLabel.textContent = 'Email'
-  const emInput = document.createElement('input')
-  emInput.className = 'fi'; emInput.type = 'email'; emInput.placeholder = 'you@example.com'
+  const emInput = document.createElement('input'); emInput.className = 'fi'; emInput.type = 'email'; emInput.placeholder = 'you@example.com'
   emGroup.appendChild(emLabel); emGroup.appendChild(emInput)
   const pwGroup = document.createElement('div'); pwGroup.className = 'fg'
   const pwLabel = document.createElement('label'); pwLabel.className = 'fl'; pwLabel.textContent = 'Password'
-  const pwInput = document.createElement('input')
-  pwInput.className = 'fi'; pwInput.type = 'password'; pwInput.placeholder = '••••••••'
+  const pwInput = document.createElement('input'); pwInput.className = 'fi'; pwInput.type = 'password'; pwInput.placeholder = '••••••••'
   pwGroup.appendChild(pwLabel); pwGroup.appendChild(pwInput)
   const signBtn = document.createElement('button'); signBtn.className = 'btn btn-primary'; signBtn.textContent = 'Sign in'
   card.appendChild(backBtn); card.appendChild(logoEl); card.appendChild(subEl)
-  card.appendChild(errEl);   card.appendChild(emGroup); card.appendChild(pwGroup); card.appendChild(signBtn)
+  card.appendChild(errEl); card.appendChild(emGroup); card.appendChild(pwGroup); card.appendChild(signBtn)
   wrap.appendChild(card); app.appendChild(wrap)
   const submit = async () => {
     signBtn.disabled = true; signBtn.textContent = 'Signing in…'; errEl.innerHTML = ''
@@ -312,61 +367,14 @@ function renderLogin() {
   pwInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit() })
 }
 
-// ── DISPLAY PICKER ────────────────────────────────────────────
-async function renderDisplayPicker() {
-  app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div></div>`
-
-  const { data: displays } = await db.from('displays').select('*, playlists(name)').order('created_at')
-
-  app.innerHTML = ''
-  const wrap = document.createElement('div'); wrap.className = 'picker'
-  const bg   = document.createElement('div'); bg.className = 'picker-bg'
-
-  const backBtn = document.createElement('button'); backBtn.className = 'picker-back'
-  backBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Home'
-  backBtn.onclick = () => go('')
-
-  const inner = document.createElement('div'); inner.className = 'picker-inner'
-  const logoEl = document.createElement('div'); logoEl.className = 'picker-logo'; logoEl.textContent = 'SlideLoop'
-  const subEl  = document.createElement('div'); subEl.className  = 'picker-sub';  subEl.textContent  = 'Choose a display'
-  const grid   = document.createElement('div'); grid.className   = 'picker-grid'
-
-  if (!displays || displays.length === 0) {
-    grid.innerHTML = '<div class="picker-empty">No displays set up yet.<br>Ask your admin to create some.</div>'
-  } else {
-    displays.forEach(disp => {
-      const card = document.createElement('div'); card.className = 'picker-card'
-      const playlistName = disp.playlists?.name || 'No playlist assigned'
-      card.innerHTML = `
-        <div class="picker-card-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-        </div>
-        <div class="picker-card-name">${disp.name}</div>
-        <div class="picker-card-playlist">${playlistName}</div>
-        <div class="picker-card-arrow">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>`
-      card.onclick = () => {
-        if (!disp.playlist_id) { alert('No playlist assigned to this display yet. Ask your admin.'); return }
-        go(`display/${disp.id}`)
-      }
-      grid.appendChild(card)
-    })
-  }
-
-  inner.appendChild(logoEl); inner.appendChild(subEl); inner.appendChild(grid)
-  wrap.appendChild(bg); wrap.appendChild(backBtn); wrap.appendChild(inner)
-  app.appendChild(wrap)
-}
-
-// ── ADMIN ─────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// ADMIN
+// ─────────────────────────────────────────────────────────────
 async function renderAdmin() {
   const { data: { session } } = await db.auth.getSession()
   if (!session) { go('admin/login'); return }
 
-  // Load playlists, settings, displays
-  let playlists = [], slides = [], activePl = null, selectedPl = null
-  let displays = []
+  let playlists = [], slides = [], selectedPl = null, displays = []
   let cfg = { default_duration_ms:8000, transition:'fade', show_progress:true, auto_loop:true }
 
   const [rPl, rCfg, rDisp] = await Promise.all([
@@ -374,20 +382,10 @@ async function renderAdmin() {
     db.from('settings').select('*').eq('id',1).single(),
     db.from('displays').select('*').order('created_at')
   ])
-
-  if (rPl.data?.length) {
-    playlists = rPl.data
-    activePl  = playlists.find(p => p.is_active) || playlists[0]
-    selectedPl = activePl
-  } else {
-    // Create default playlist if none exist
-    const { data: newPl } = await db.from('playlists').insert({ name:'Default', is_active:true }).select().single()
-    if (newPl) { playlists = [newPl]; activePl = newPl; selectedPl = newPl }
-  }
+  if (rPl.data?.length) { playlists = rPl.data; selectedPl = playlists[0] }
   if (rCfg.data) cfg = rCfg.data
   if (rDisp.data) displays = rDisp.data
 
-  // Fetch slides for selected playlist
   async function loadSlides() {
     if (!selectedPl) return
     const { data } = await db.from('slides').select('*').eq('playlist_id', selectedPl.id).order('display_order')
@@ -403,9 +401,9 @@ async function renderAdmin() {
           <span class="admin-logo">SlideLoop</span>
           <span class="a-badge">Admin</span>
         </div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px">
           <button class="btn btn-ghost btn-sm" id="btn-preview">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Preview
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Displays
           </button>
           <button class="btn btn-ghost btn-sm" id="btn-logout">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>Logout
@@ -424,7 +422,7 @@ async function renderAdmin() {
             <div class="srow">
               <span class="srl">Seconds per slide</span>
               <div style="display:flex;align-items:center;gap:5px">
-                <input class="si" id="cfg-dur" type="number" min="1" max="300" value="${Math.round(cfg.default_duration_ms/1000)}" style="width:62px;text-align:right">
+                <input class="si" id="cfg-dur" type="number" min="1" max="300" value="${Math.round(cfg.default_duration_ms/1000)}" style="width:60px;text-align:right">
                 <span style="font-size:12px;color:var(--muted)">s</span>
               </div>
             </div>
@@ -447,11 +445,11 @@ async function renderAdmin() {
           <button class="btn btn-primary" id="btn-save">Save Settings</button>
           <hr class="divider">
           <div class="sec-title">Displays</div>
-          <div id="disp-mgmt-area"></div>
+          <div id="disp-area"></div>
           <hr class="divider">
           <div class="help-box">
             <b>Tips</b>
-            Drag slides to reorder · Each slide has its own duration · Create playlists and assign them to displays
+            Drag slides to reorder · Set duration per slide · Toggle displays online/offline · Assign playlists to displays
           </div>
         </aside>
       </div>
@@ -465,23 +463,19 @@ async function renderAdmin() {
   document.getElementById('btn-save').onclick = async () => {
     const btn = document.getElementById('btn-save')
     btn.disabled = true; btn.textContent = 'Saving…'
-    const newDurMs = +document.getElementById('cfg-dur').value * 1000
-    const { error } = await db.from('settings').upsert({
-      id: 1,
-      default_duration_ms: newDurMs,
-      transition:    document.getElementById('cfg-trans').value,
-      show_progress: document.getElementById('cfg-prog').classList.contains('on'),
-      auto_loop:     document.getElementById('cfg-loop').classList.contains('on')
+    const newMs = +document.getElementById('cfg-dur').value * 1000
+    await db.from('settings').upsert({
+      id:1, default_duration_ms:newMs,
+      transition:   document.getElementById('cfg-trans').value,
+      show_progress:document.getElementById('cfg-prog').classList.contains('on'),
+      auto_loop:    document.getElementById('cfg-loop').classList.contains('on')
     })
-    if (error) { toast('Failed to save', false); btn.disabled = false; btn.textContent = 'Save Settings'; return }
-
-    // Offer to overwrite all slides in the current playlist
-    if (slides.length > 0 && confirm(`Also apply ${Math.round(newDurMs/1000)}s duration to all ${slides.length} slides in "${selectedPl?.name}"?`)) {
-      await db.from('slides').update({ duration_ms: newDurMs }).eq('playlist_id', selectedPl.id)
-      slides.forEach(s => s.duration_ms = newDurMs)
+    if (slides.length && confirm(`Apply ${Math.round(newMs/1000)}s to all slides in "${selectedPl?.name}"?`)) {
+      await db.from('slides').update({ duration_ms: newMs }).eq('playlist_id', selectedPl.id)
+      slides.forEach(s => s.duration_ms = newMs)
       drawSlides()
     }
-    cfg.default_duration_ms = newDurMs
+    cfg.default_duration_ms = newMs
     btn.disabled = false; btn.textContent = 'Save Settings'
     toast('Settings saved')
   }
@@ -489,50 +483,30 @@ async function renderAdmin() {
   drawPlaylistTabs()
   drawDisplays()
 
-  // ── PLAYLIST TABS ──
+  // ── PLAYLIST TABS ──────────────────────────────────────────
   function drawPlaylistTabs() {
-    const area = document.getElementById('pl-tabs-area')
-    if (!area) return
+    const area = document.getElementById('pl-tabs-area'); if (!area) return
     area.innerHTML = ''
-
     const tabs = document.createElement('div'); tabs.className = 'pl-tabs'
 
     playlists.forEach(pl => {
-      const isActive  = pl.id === activePl?.id
-      const isSelected = pl.id === selectedPl?.id
       const tab = document.createElement('div')
-      tab.className = `pl-tab${isSelected?' active':''}${isActive?' live-tab':''}`
-      tab.innerHTML = `${isActive?'<div class="live-dot"></div>':''}${pl.name}${isActive?' <span style="font-size:10px;opacity:.7">LIVE</span>':''}`
-      tab.onclick = async () => {
-        selectedPl = pl
-        await loadSlides()
-        drawPlaylistTabs()
-        drawSlides()
-      }
-
-      // Delete button (only if not the last playlist)
+      tab.className = `pl-tab${pl.id === selectedPl?.id ? ' sel' : ''}`
+      tab.textContent = pl.name
+      tab.onclick = async () => { selectedPl = pl; await loadSlides(); drawPlaylistTabs(); drawSlides() }
       if (playlists.length > 1) {
         const del = document.createElement('button'); del.className = 'pl-tab-del'; del.textContent = '×'
         del.onclick = async e => {
           e.stopPropagation()
           if (!confirm(`Delete playlist "${pl.name}" and all its slides?`)) return
-          // Delete slides from storage
-          const { data: plSlides } = await db.from('slides').select('storage_path').eq('playlist_id', pl.id)
-          if (plSlides?.length) {
-            const paths = plSlides.map(s => s.storage_path).filter(Boolean)
-            if (paths.length) await db.storage.from('slideloop').remove(paths)
-          }
+          const { data: ss } = await db.from('slides').select('storage_path').eq('playlist_id', pl.id)
+          const paths = (ss||[]).map(s=>s.storage_path).filter(Boolean)
+          if (paths.length) await db.storage.from('slideloop').remove(paths)
           await db.from('slides').delete().eq('playlist_id', pl.id)
           await db.from('playlists').delete().eq('id', pl.id)
-          playlists = playlists.filter(x => x.id !== pl.id)
+          playlists = playlists.filter(x=>x.id!==pl.id)
           if (selectedPl?.id === pl.id) selectedPl = playlists[0]
-          if (activePl?.id === pl.id) {
-            // Make first remaining playlist active
-            await db.from('playlists').update({ is_active: true }).eq('id', playlists[0].id)
-            playlists[0].is_active = true; activePl = playlists[0]
-          }
-          await loadSlides()
-          drawPlaylistTabs(); drawSlides()
+          await loadSlides(); drawPlaylistTabs(); drawSlides()
           toast('Playlist deleted')
         }
         tab.appendChild(del)
@@ -540,94 +514,60 @@ async function renderAdmin() {
       tabs.appendChild(tab)
     })
 
-    // "New playlist" button
     const addBtn = document.createElement('button'); addBtn.className = 'pl-tab'
     addBtn.style.cssText = 'border-style:dashed;color:var(--muted)'
-    addBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> New playlist'
+    addBtn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> New`
     addBtn.onclick = async () => {
-      const name = prompt('Playlist name:')
-      if (!name?.trim()) return
-      const { data: newPl } = await db.from('playlists').insert({ name: name.trim(), is_active: false }).select().single()
-      if (newPl) { playlists.push(newPl); selectedPl = newPl; await loadSlides(); drawPlaylistTabs(); drawSlides() }
+      const name = prompt('Playlist name:'); if (!name?.trim()) return
+      const { data: p } = await db.from('playlists').insert({ name:name.trim() }).select().single()
+      if (p) { playlists.push(p); selectedPl = p; await loadSlides(); drawPlaylistTabs(); drawSlides() }
     }
     tabs.appendChild(addBtn)
 
-    // Toolbar below tabs
     const bar = document.createElement('div'); bar.className = 'pl-bar'
-    const title = document.createElement('div')
-    title.style.cssText = 'font-size:18px;font-weight:600;flex:1'
-    title.innerHTML = `Slides <span style="font-size:13px;font-weight:400;color:var(--muted)" id="slide-count"></span>`
-    bar.appendChild(title)
-
-    // Set as Live button (only shown if selected isn't live)
-    if (selectedPl && selectedPl.id !== activePl?.id) {
-      const liveBtn = document.createElement('button'); liveBtn.className = 'btn btn-green btn-sm'
-      liveBtn.innerHTML = '<div class="live-dot" style="animation:none"></div> Set as Live'
-      liveBtn.onclick = async () => {
-        await db.from('playlists').update({ is_active: false }).neq('id', selectedPl.id)
-        await db.from('playlists').update({ is_active: true }).eq('id', selectedPl.id)
-        playlists.forEach(p => p.is_active = p.id === selectedPl.id)
-        activePl = selectedPl
-        drawPlaylistTabs(); drawSlides()
-        toast(`"${selectedPl.name}" is now Live`)
-      }
-      bar.appendChild(liveBtn)
-    }
-
+    const titleEl = document.createElement('div')
+    titleEl.innerHTML = `<span style="font-size:18px;font-weight:600">Slides</span> <span id="slide-count" style="font-size:13px;color:var(--muted);margin-left:6px"></span>`
     const upBtn = document.createElement('button'); upBtn.className = 'btn btn-primary'; upBtn.style.width = 'auto'
-    upBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg> Upload Slides'
+    upBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg> Upload Slides`
     upBtn.onclick = openUpload
-    bar.appendChild(upBtn)
+    bar.appendChild(titleEl); bar.appendChild(upBtn)
 
-    area.appendChild(tabs)
-    area.appendChild(bar)
+    area.appendChild(tabs); area.appendChild(bar)
   }
 
-  // ── SLIDE LIST ──
+  // ── SLIDES ─────────────────────────────────────────────────
   function drawSlides() {
-    const countEl = document.getElementById('slide-count')
-    if (countEl) countEl.textContent = `${slides.length} item${slides.length!==1?'s':''}`
-    const area = document.getElementById('slides-area')
-    if (!area) return
-
+    const ct = document.getElementById('slide-count'); if (ct) ct.textContent = `${slides.length} item${slides.length!==1?'s':''}`
+    const area = document.getElementById('slides-area'); if (!area) return
     if (!slides.length) {
-      area.innerHTML = `
-        <div class="empty-state">
-          <div style="font-size:36px;margin-bottom:12px;opacity:.3">🎞️</div>
-          <div style="font-size:15px;font-weight:500;color:var(--dim);margin-bottom:4px">No slides in this playlist</div>
-          <div style="font-size:13px;color:var(--muted)">Click "Upload Slides" to add some</div>
-        </div>`
+      area.innerHTML = `<div class="empty-state"><div style="font-size:36px;margin-bottom:12px;opacity:.3">🎞️</div><div style="font-size:15px;font-weight:500;color:var(--dim);margin-bottom:4px">No slides in this playlist</div><div style="font-size:13px;color:var(--muted)">Click Upload Slides to add some</div></div>`
       return
     }
-
     area.innerHTML = `<div class="slides-list">${slides.map(rowHTML).join('')}</div>`
     slides.forEach(s => { if (s.file_type==='pdf') renderThumb(s.file_url, `th-${s.id}`) })
-
     let dragFrom = null
     slides.forEach((s, i) => {
-      const row = document.getElementById(`sr-${s.id}`)
-      if (!row) return
+      const row = document.getElementById(`sr-${s.id}`); if (!row) return
       row.draggable = true
-      row.ondragstart = ()  => { dragFrom = i; row.style.opacity = '.35' }
-      row.ondragend   = ()  => { row.style.opacity = '1'; clearDO() }
+      row.ondragstart = ()  => { dragFrom=i; row.style.opacity='.35' }
+      row.ondragend   = ()  => { row.style.opacity='1'; clearDO() }
       row.ondragover  = e  => { e.preventDefault(); clearDO(); row.classList.add('drag-over') }
       row.ondrop      = async e => {
         e.preventDefault(); clearDO()
         if (dragFrom===null||dragFrom===i) return
-        const [m] = slides.splice(dragFrom,1); slides.splice(i,0,m)
-        slides.forEach((s,idx) => s.display_order=idx)
-        dragFrom = null; drawSlides()
-        await Promise.all(slides.map(s => db.from('slides').update({display_order:s.display_order}).eq('id',s.id)))
+        const [m]=slides.splice(dragFrom,1); slides.splice(i,0,m)
+        slides.forEach((s,j)=>s.display_order=j); dragFrom=null; drawSlides()
+        await Promise.all(slides.map(s=>db.from('slides').update({display_order:s.display_order}).eq('id',s.id)))
       }
       document.getElementById(`dur-${s.id}`).onchange = async e => {
-        const ms = +e.target.value*1000; slides[i].duration_ms=ms
+        const ms=+e.target.value*1000; slides[i].duration_ms=ms
         await db.from('slides').update({duration_ms:ms}).eq('id',s.id)
       }
       document.getElementById(`del-${s.id}`).onclick = async () => {
         if (!confirm(`Delete "${s.title}"?`)) return
         await db.from('slides').delete().eq('id',s.id)
         if (s.storage_path) await db.storage.from('slideloop').remove([s.storage_path])
-        slides = slides.filter(x=>x.id!==s.id); drawSlides(); toast('Slide deleted')
+        slides=slides.filter(x=>x.id!==s.id); drawSlides(); toast('Slide deleted')
       }
     })
     function clearDO() { document.querySelectorAll('.slide-row').forEach(r=>r.classList.remove('drag-over')) }
@@ -636,277 +576,235 @@ async function renderAdmin() {
   function rowHTML(s) {
     const dur = Math.round((s.duration_ms||8000)/1000)
     const thumb = s.file_type==='image'?`<img src="${s.file_url}" alt="">`:s.file_type==='pdf'?`<canvas id="th-${s.id}"></canvas>`:`<span>📊</span>`
-    return `
-      <div class="slide-row" id="sr-${s.id}">
-        <div class="drag-h">⠿</div>
-        <div class="s-thumb">${thumb}</div>
-        <div class="s-info">
-          <div class="s-name" title="${s.title}">${s.title}</div>
-          <div class="s-meta">
-            <span class="tbadge ${s.file_type}">${s.file_type.toUpperCase()}</span>
-            ${s.page_count>1?`<span>${s.page_count} pages</span>`:''}
-          </div>
-        </div>
-        <div class="s-acts">
-          <input class="dur-in" id="dur-${s.id}" type="number" min="1" max="300" value="${dur}" title="Seconds">
-          <span style="font-size:11px;color:var(--muted)">s</span>
-          <button class="btn btn-danger btn-sm btn-ic" id="del-${s.id}">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-          </button>
-        </div>
-      </div>`
+    return `<div class="slide-row" id="sr-${s.id}">
+      <div class="drag-h">⠿</div>
+      <div class="s-thumb">${thumb}</div>
+      <div class="s-info">
+        <div class="s-name" title="${s.title}">${s.title}</div>
+        <div class="s-meta"><span class="tbadge ${s.file_type}">${s.file_type.toUpperCase()}</span>${s.page_count>1?`<span>${s.page_count} pages</span>`:''}</div>
+      </div>
+      <div class="s-acts">
+        <input class="dur-in" id="dur-${s.id}" type="number" min="1" max="300" value="${dur}" title="Seconds">
+        <span style="font-size:11px;color:var(--muted)">s</span>
+        <button class="btn btn-danger btn-sm btn-ic" id="del-${s.id}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+      </div>
+    </div>`
   }
 
-  async function renderThumb(url, canvasId) {
+  async function renderThumb(url, id) {
     const lib = await pdfjs(); if (!lib) return
     try {
       const pdf=await lib.getDocument(url).promise; const page=await pdf.getPage(1)
       const vp=page.getViewport({scale:1}); const scale=54/vp.width
-      const canvas=document.getElementById(canvasId); if(!canvas) return
-      canvas.width=54; canvas.height=Math.round(vp.height*scale)
-      await page.render({canvasContext:canvas.getContext('2d'),viewport:page.getViewport({scale})}).promise
+      const c=document.getElementById(id); if(!c) return
+      c.width=54; c.height=Math.round(vp.height*scale)
+      await page.render({canvasContext:c.getContext('2d'),viewport:page.getViewport({scale})}).promise
     } catch(_){}
   }
 
-  // ── DISPLAY MANAGEMENT ──
+  // ── DISPLAYS ───────────────────────────────────────────────
   function drawDisplays() {
-    const area = document.getElementById('disp-mgmt-area')
-    if (!area) return
+    const area = document.getElementById('disp-area'); if (!area) return
     area.innerHTML = ''
-
     if (displays.length) {
       const list = document.createElement('div'); list.className = 'disp-list'
-      displays.forEach((disp, i) => {
+      displays.forEach((d, i) => {
         const item = document.createElement('div'); item.className = 'disp-item'
 
-        const nameRow = document.createElement('div'); nameRow.className = 'disp-item-name'
-        const nameInput = document.createElement('input'); nameInput.className = 'disp-name-input'
-        nameInput.value = disp.name; nameInput.title = 'Click to rename'
-        nameInput.onchange = async () => {
-          const v = nameInput.value.trim()
-          if (!v) { nameInput.value = disp.name; return }
-          await db.from('displays').update({ name: v }).eq('id', disp.id)
-          displays[i].name = v
+        // Name + delete
+        const head = document.createElement('div'); head.className = 'disp-item-head'
+        const nameIn = document.createElement('input'); nameIn.className = 'disp-name-in'; nameIn.value = d.name
+        nameIn.onchange = async () => {
+          const v = nameIn.value.trim(); if (!v) { nameIn.value = d.name; return }
+          await db.from('displays').update({ name:v }).eq('id',d.id); displays[i].name = v
         }
         const delBtn = document.createElement('button'); delBtn.className = 'btn btn-danger btn-sm btn-ic'
         delBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>'
-        delBtn.title = 'Delete display'
         delBtn.onclick = async () => {
-          if (!confirm(`Delete display "${disp.name}"?`)) return
-          await db.from('displays').delete().eq('id', disp.id)
-          displays = displays.filter(d => d.id !== disp.id)
-          drawDisplays()
-          toast(`"${disp.name}" deleted`)
+          if (!confirm(`Delete display "${d.name}"?`)) return
+          await db.from('displays').delete().eq('id',d.id)
+          displays=displays.filter(x=>x.id!==d.id); drawDisplays(); toast(`"${d.name}" deleted`)
         }
-        nameRow.appendChild(nameInput); nameRow.appendChild(delBtn)
+        head.appendChild(nameIn); head.appendChild(delBtn)
 
-        const plRow = document.createElement('div'); plRow.className = 'disp-item-row'
-        const plLabel = document.createElement('span')
-        plLabel.style.cssText = 'font-size:11px;color:var(--muted);flex-shrink:0'
-        plLabel.textContent = 'Playlist:'
-        const plSelect = document.createElement('select')
-        plSelect.className = 'si'; plSelect.style.cssText = 'flex:1;min-width:0;font-size:12px'
-        const noneOpt = document.createElement('option'); noneOpt.value = ''; noneOpt.textContent = '— none —'
-        plSelect.appendChild(noneOpt)
+        // Playlist
+        const plRow = document.createElement('div'); plRow.className = 'disp-pl-row'
+        const plLbl = document.createElement('span'); plLbl.className = 'disp-pl-label'; plLbl.textContent = 'Playlist:'
+        const plSel = document.createElement('select'); plSel.className = 'si disp-pl-sel'
+        const noneOpt = document.createElement('option'); noneOpt.value=''; noneOpt.textContent='— none —'
+        plSel.appendChild(noneOpt)
         playlists.forEach(pl => {
-          const opt = document.createElement('option'); opt.value = pl.id; opt.textContent = pl.name
-          if (pl.id === disp.playlist_id) opt.selected = true
-          plSelect.appendChild(opt)
+          const opt=document.createElement('option'); opt.value=pl.id; opt.textContent=pl.name
+          if (pl.id===d.playlist_id) opt.selected=true
+          plSel.appendChild(opt)
         })
-        plSelect.onchange = async () => {
-          const plId = plSelect.value || null
-          await db.from('displays').update({ playlist_id: plId }).eq('id', disp.id)
-          displays[i].playlist_id = plId
+        plSel.onchange = async () => {
+          const v=plSel.value||null
+          await db.from('displays').update({playlist_id:v}).eq('id',d.id); displays[i].playlist_id=v
         }
-        plRow.appendChild(plLabel); plRow.appendChild(plSelect)
-        item.appendChild(nameRow); item.appendChild(plRow)
+        plRow.appendChild(plLbl); plRow.appendChild(plSel)
+
+        // Online / Offline toggle
+        const statusRow = document.createElement('div'); statusRow.className = 'disp-status-row'
+        const statusLbl = document.createElement('div'); statusLbl.className = 'disp-status-label'
+        const dot = document.createElement('div'); dot.className = d.is_online ? 'online-dot' : 'offline-dot'
+        if (d.is_online) dot.style.animation = 'pulse 2s infinite'
+        const statusTxt = document.createElement('span'); statusTxt.textContent = d.is_online ? 'Online' : 'Offline'
+        statusTxt.style.color = d.is_online ? 'var(--green)' : 'var(--muted)'
+        statusLbl.appendChild(dot); statusLbl.appendChild(statusTxt)
+
+        const toggle = document.createElement('button')
+        toggle.className = `tgl ${d.is_online ? 'on' : ''}`
+        toggle.onclick = async () => {
+          const newVal = !d.is_online
+          await db.from('displays').update({ is_online:newVal }).eq('id',d.id)
+          displays[i].is_online = newVal; drawDisplays()
+          toast(`"${d.name}" is now ${newVal ? 'Online' : 'Offline'}`)
+        }
+        statusRow.appendChild(statusLbl); statusRow.appendChild(toggle)
+
+        item.appendChild(head); item.appendChild(plRow); item.appendChild(statusRow)
         list.appendChild(item)
       })
       area.appendChild(list)
     }
 
-    const addBtn = document.createElement('button'); addBtn.className = 'btn btn-ghost btn-sm'
-    addBtn.style.width = '100%'
+    const addBtn = document.createElement('button'); addBtn.className = 'btn btn-ghost btn-sm'; addBtn.style.width='100%'
     addBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> New Display'
     addBtn.onclick = async () => {
-      const name = prompt('Display name (e.g. Reception, Canteen, Hall):')
-      if (!name?.trim()) return
-      const { data: newDisp } = await db.from('displays').insert({ name: name.trim(), playlist_id: null }).select().single()
-      if (newDisp) { displays.push(newDisp); drawDisplays(); toast(`Display "${newDisp.name}" created`) }
+      const name = prompt('Display name (e.g. Reception, Canteen):'); if (!name?.trim()) return
+      const { data:nd } = await db.from('displays').insert({ name:name.trim(), is_online:false }).select().single()
+      if (nd) { displays.push(nd); drawDisplays(); toast(`"${nd.name}" created`) }
     }
     area.appendChild(addBtn)
   }
 
-  // ── MULTI-FILE UPLOAD ──
+  // ── UPLOAD ─────────────────────────────────────────────────
   function openUpload() {
     if (!selectedPl) return
-    let queue = [] // [{file, status:'pending'|'uploading'|'done'|'error', msg}]
-
+    let queue = []
     const ov = document.createElement('div'); ov.className = 'modal-ov'
     const modal = document.createElement('div'); modal.className = 'modal'
     ov.appendChild(modal); document.body.appendChild(ov)
-    ov.onclick = e => { if(e.target===ov && !isUploading()) ov.remove() }
+    ov.onclick = e => { if(e.target===ov && !queue.some(q=>q.s==='uploading')) ov.remove() }
 
-    function isUploading() { return queue.some(q=>q.status==='uploading') }
-
-    function renderModal() {
+    function render() {
       modal.innerHTML = ''
-
-      const title = document.createElement('div'); title.className = 'modal-title'
-      title.textContent = `Upload to "${selectedPl.name}"`
+      const title = document.createElement('div'); title.className='modal-title'; title.textContent=`Upload to "${selectedPl.name}"`
       modal.appendChild(title)
-
-      // Drop zone
-      const dz = document.createElement('div'); dz.className = 'dropzone'
-      dz.innerHTML = `<div style="font-size:28px;margin-bottom:8px">📁</div><div style="font-size:14px;font-weight:500;margin-bottom:3px">Drop files here or click to browse</div><div style="font-size:12px;color:var(--muted)">Images · PDF · PowerPoint — select multiple at once</div>`
-      const fIn = document.createElement('input'); fIn.type='file'; fIn.multiple=true
-      fIn.accept='.jpg,.jpeg,.png,.gif,.webp,.pdf,.pptx,.ppt'; fIn.style.display='none'
-      dz.appendChild(fIn)
-      dz.onclick = ()=>fIn.click()
-      dz.ondragover  = e=>{e.preventDefault();dz.classList.add('dz-over')}
-      dz.ondragleave = ()=>dz.classList.remove('dz-over')
-      dz.ondrop = e=>{e.preventDefault();dz.classList.remove('dz-over');addFiles(e.dataTransfer.files)}
-      fIn.onchange = ()=>addFiles(fIn.files)
+      const dz = document.createElement('div'); dz.className='dropzone'
+      dz.innerHTML=`<div style="font-size:28px;margin-bottom:8px">📁</div><div style="font-size:14px;font-weight:500;margin-bottom:3px">Drop files here or click to browse</div><div style="font-size:12px;color:var(--muted)">Images · PDF · PowerPoint — select multiple</div>`
+      const fIn=document.createElement('input'); fIn.type='file'; fIn.multiple=true; fIn.accept='.jpg,.jpeg,.png,.gif,.webp,.pdf,.pptx,.ppt'; fIn.style.display='none'
+      dz.appendChild(fIn); dz.onclick=()=>fIn.click()
+      dz.ondragover=e=>{e.preventDefault();dz.classList.add('dz-over')}; dz.ondragleave=()=>dz.classList.remove('dz-over')
+      dz.ondrop=e=>{e.preventDefault();dz.classList.remove('dz-over');addFiles(e.dataTransfer.files)}
+      fIn.onchange=()=>addFiles(fIn.files)
       modal.appendChild(dz)
 
-      // Queue list
       if (queue.length) {
-        const ql = document.createElement('div'); ql.className = 'queue-list'
-        queue.forEach((item, i) => {
-          const row = document.createElement('div'); row.className = 'q-item'
-          const icon = { pdf:'📄', pptx:'📊', image:'🖼️' }[fileType(item.file.name)]
-          const statusClass = item.status==='done'?'done':item.status==='error'?'err':item.status==='uploading'?'uploading':''
-          const statusText  = item.status==='done'?'✓ Done':item.status==='error'?'✕ Failed':item.status==='uploading'?'Uploading…':'Pending'
-          row.innerHTML = `<span class="q-item-icon">${icon}</span><span class="q-item-name">${item.file.name}</span><span class="q-item-status ${statusClass}">${statusText}</span>`
-          if (item.status==='pending') {
-            const rm = document.createElement('button'); rm.className='q-remove'; rm.textContent='×'
-            rm.onclick = ()=>{ queue.splice(i,1); renderModal() }
-            row.appendChild(rm)
-          }
+        const ql=document.createElement('div'); ql.className='queue-list'
+        queue.forEach((item,i)=>{
+          const row=document.createElement('div'); row.className='q-item'
+          const icon={pdf:'📄',pptx:'📊',image:'🖼️'}[fileType(item.f.name)]
+          const sc=item.s==='done'?'done':item.s==='error'?'err':item.s==='uploading'?'uploading':''
+          const st=item.s==='done'?'✓ Done':item.s==='error'?'✕ Failed':item.s==='uploading'?'Uploading…':'Pending'
+          row.innerHTML=`<span class="q-icon">${icon}</span><span class="q-name">${item.f.name}</span><span class="q-status ${sc}">${st}</span>`
+          if (item.s==='pending'){const rm=document.createElement('button');rm.className='q-rm';rm.textContent='×';rm.onclick=()=>{queue.splice(i,1);render()};row.appendChild(rm)}
           ql.appendChild(row)
         })
         modal.appendChild(ql)
       }
 
-      // Default duration
-      const durGroup = document.createElement('div'); durGroup.className='fg'
-      const durLabel = document.createElement('label'); durLabel.className='fl'; durLabel.textContent='Default duration for all new slides'
-      const durInput = document.createElement('input'); durInput.className='fi'; durInput.type='number'
-      durInput.min='1'; durInput.max='300'; durInput.value=Math.round(cfg.default_duration_ms/1000)
-      durInput.id='upload-dur'
-      durGroup.appendChild(durLabel); durGroup.appendChild(durInput)
-      modal.appendChild(durGroup)
+      const durG=document.createElement('div');durG.className='fg'
+      const durL=document.createElement('label');durL.className='fl';durL.textContent='Duration for all new slides (seconds)'
+      const durI=document.createElement('input');durI.className='fi';durI.type='number';durI.min='1';durI.max='300';durI.value=Math.round(cfg.default_duration_ms/1000);durI.id='up-dur'
+      durG.appendChild(durL);durG.appendChild(durI);modal.appendChild(durG)
 
-      // Actions
-      const actions = document.createElement('div'); actions.className='modal-actions'
-      const cancelBtn = document.createElement('button'); cancelBtn.className='btn btn-ghost'; cancelBtn.textContent='Cancel'
-      cancelBtn.onclick = ()=>ov.remove()
-      const uploadBtn = document.createElement('button'); uploadBtn.className='btn btn-primary'; uploadBtn.style.width='auto'
-      const pending = queue.filter(q=>q.status==='pending').length
-      uploadBtn.textContent = pending ? `Upload ${pending} file${pending!==1?'s':''}` : 'Upload'
-      uploadBtn.disabled = !pending
-      uploadBtn.onclick = ()=>startUpload(durInput)
-      actions.appendChild(cancelBtn); actions.appendChild(uploadBtn)
-      modal.appendChild(actions)
+      const acts=document.createElement('div');acts.className='modal-actions'
+      const cancelBtn=document.createElement('button');cancelBtn.className='btn btn-ghost';cancelBtn.textContent='Cancel';cancelBtn.onclick=()=>ov.remove()
+      const upBtn=document.createElement('button');upBtn.className='btn btn-primary';upBtn.style.width='auto'
+      const pending=queue.filter(q=>q.s==='pending').length
+      upBtn.textContent=pending?`Upload ${pending} file${pending!==1?'s':''}` :'Upload';upBtn.disabled=!pending
+      upBtn.onclick=()=>doUpload(durI)
+      acts.appendChild(cancelBtn);acts.appendChild(upBtn);modal.appendChild(acts)
     }
 
-    function addFiles(fileList) {
-      Array.from(fileList).forEach(f => { queue.push({file:f,status:'pending'}) })
-      renderModal()
-    }
+    function addFiles(fl) { Array.from(fl).forEach(f=>queue.push({f,s:'pending'})); render() }
 
-    async function startUpload(durInput) {
-      const durMs = +durInput.value * 1000
-      const pending = queue.filter(q=>q.status==='pending')
-      for (const item of pending) {
-        item.status = 'uploading'; renderModal()
+    async function doUpload(durI) {
+      const durMs=+durI.value*1000
+      for (const item of queue.filter(q=>q.s==='pending')) {
+        item.s='uploading'; render()
         try {
-          const ftype = fileType(item.file.name)
-          const ext   = item.file.name.split('.').pop()
-          const path  = `slides/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-          let pageCount = 1
-          if (ftype==='pdf') {
-            try { const lib=await pdfjs(); if(lib){const buf=await item.file.arrayBuffer();const pdf=await lib.getDocument({data:buf}).promise;pageCount=pdf.numPages} } catch(_){}
-          }
-          const {error:upErr} = await db.storage.from('slideloop').upload(path, item.file, {cacheControl:'3600',upsert:false})
-          if (upErr) throw upErr
-          const {data:{publicUrl}} = db.storage.from('slideloop').getPublicUrl(path)
-          const title = item.file.name.replace(/\.[^/.]+$/,'')
-          const {data:newSlide,error:dbErr} = await db.from('slides').insert({
-            title, file_url:publicUrl, file_type:ftype, storage_path:path,
-            page_count:pageCount, playlist_id:selectedPl.id,
-            display_order:slides.length, duration_ms:durMs
-          }).select().single()
-          if (dbErr) throw dbErr
-          slides.push(newSlide)
-          item.status = 'done'
-        } catch(err) {
-          item.status = 'error'; item.msg = err.message
-        }
-        renderModal()
+          const ft=fileType(item.f.name), ext=item.f.name.split('.').pop()
+          const path=`slides/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+          let pc=1
+          if (ft==='pdf'){try{const lib=await pdfjs();if(lib){const buf=await item.f.arrayBuffer();const pdf=await lib.getDocument({data:buf}).promise;pc=pdf.numPages}}catch(_){}}
+          const {error:ue}=await db.storage.from('slideloop').upload(path,item.f,{cacheControl:'3600',upsert:false})
+          if(ue)throw ue
+          const {data:{publicUrl}}=db.storage.from('slideloop').getPublicUrl(path)
+          const {data:ns,error:de}=await db.from('slides').insert({title:item.f.name.replace(/\.[^/.]+$/,''),file_url:publicUrl,file_type:ft,storage_path:path,page_count:pc,playlist_id:selectedPl.id,display_order:slides.length,duration_ms:durMs}).select().single()
+          if(de)throw de
+          slides.push(ns); item.s='done'
+        } catch(err){ item.s='error' }
+        render()
       }
       drawSlides()
-      const failed = queue.filter(q=>q.status==='error').length
-      if (!failed) { toast(`${pending.length} slide${pending.length!==1?'s':''} uploaded!`); ov.remove() }
-      else toast(`${failed} file${failed!==1?'s':''} failed — check and retry`, false)
+      const failed=queue.filter(q=>q.s==='error').length
+      if(!failed){toast(`Uploaded!`);ov.remove()}
+      else toast(`${failed} file${failed!==1?'s':''} failed`,false)
     }
-
-    renderModal()
+    render()
   }
 }
 
-// ── DISPLAY (SYNCHRONISED) ────────────────────────────────────
-// How sync works:
-//  - One "master" timer writes {slide_index, started_at} to the `sync` table every time the slide changes
-//  - Every display screen subscribes to that row via Supabase Realtime
-//  - When a sync update arrives, all screens jump to the correct slide and calculate
-//    how far through the current duration they should already be (so progress bar is accurate)
-//  - The first screen to open becomes master; if it closes another takes over within one slide cycle
-
+// ─────────────────────────────────────────────────────────────
+// DISPLAY  — clean, reliable, synced
+// ─────────────────────────────────────────────────────────────
 async function renderDisplay(displayId) {
-  app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div><div style="font-size:13px;color:rgba(255,255,255,.3)">Loading slideshow…</div></div>`
+  app.innerHTML = `<div class="d-load"><div class="d-logo">SlideLoop</div><div class="spin"></div><div style="font-size:13px;color:rgba(255,255,255,.3)">Loading…</div></div>`
 
-  // Fetch display record to find its playlist
-  const [rDisp, rCfg] = await Promise.all([
-    displayId ? db.from('displays').select('*, playlists(id)').eq('id', displayId).single() : Promise.resolve({data:null}),
-    db.from('settings').select('*').eq('id',1).single()
+  // Load display, its playlist slides, settings, and existing sync state
+  const [rDisp, rCfg, rSync] = await Promise.all([
+    db.from('displays').select('*, playlists(id,name)').eq('id', displayId).single(),
+    db.from('settings').select('*').eq('id',1).single(),
+    db.from('sync').select('*').eq('display_id', displayId).single()
   ])
-  const cfg = rCfg.data || {default_duration_ms:8000,transition:'fade',show_progress:true,auto_loop:true}
 
-  // Get playlist id from display record
-  const playlistId = rDisp.data?.playlist_id || rDisp.data?.playlists?.id || null
+  const disp = rDisp.data
+  const cfg  = rCfg.data || { default_duration_ms:8000, transition:'fade', show_progress:true, auto_loop:true }
 
-  // Fetch sync state for this display
-  const rSync = displayId
-    ? await db.from('sync').select('*').eq('display_id', displayId).single()
-    : {data:null}
-
-  let rawSlides = []
-  if (playlistId) {
-    const {data} = await db.from('slides').select('*').eq('playlist_id', playlistId).order('display_order')
-    rawSlides = data || []
-  }
-
-  const items = expandSlides(rawSlides)
-  let idx=0, alive=true, timer=null, raf=null, cursorT=null
-  let isMaster = false
-  const MASTER_KEY = 'slideloop_master_' + (displayId || 'default')
-
-  if (!items.length) {
+  // Offline check
+  if (!disp || !disp.is_online) {
     app.innerHTML = `
-      <div class="d-empty">
+      <div class="d-offline">
         <div class="d-logo" style="margin-bottom:12px">SlideLoop</div>
-        <div style="font-size:15px">No slides to display</div>
-        <div style="font-size:13px;margin-top:4px">Add slides from the admin panel</div>
-        <button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button>
+        <div style="font-size:22px;margin-bottom:8px">📴</div>
+        <div style="font-size:16px;color:rgba(255,255,255,.35)">${disp?.name || 'This display'} is currently offline</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.2);margin-top:6px">Ask your admin to turn it on</div>
+        <button class="btn btn-ghost" style="margin-top:24px" onclick="location.hash='displays'">← Back</button>
       </div>`
     return
   }
 
+  if (!disp.playlist_id) {
+    app.innerHTML = `<div class="d-empty"><div class="d-logo">SlideLoop</div><div style="font-size:14px">No playlist assigned to this display</div><button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button></div>`
+    return
+  }
+
+  const { data: rawSlides } = await db.from('slides').select('*').eq('playlist_id', disp.playlist_id).order('display_order')
+  const items = expandSlides(rawSlides || [])
+
+  if (!items.length) {
+    app.innerHTML = `<div class="d-empty"><div class="d-logo">SlideLoop</div><div style="font-size:14px">No slides in this playlist</div><button class="btn btn-ghost" style="margin-top:20px" onclick="location.hash='displays'">← Back</button></div>`
+    return
+  }
+
+  // ── BUILD UI ──
   app.innerHTML = `
     <div class="disp ui-vis" id="d-root">
       <div id="d-slides"></div>
-      <div class="d-prog" id="d-prog" style="width:0%"></div>
+      <div class="d-prog" id="d-prog" style="width:0%;transition:none"></div>
       <div class="d-ui">
         <div class="d-ctr" id="d-ctr"></div>
         <div style="display:flex;gap:7px">
@@ -917,190 +815,198 @@ async function renderDisplay(displayId) {
       </div>
     </div>`
 
-  const root=document.getElementById('d-root'), wrap=document.getElementById('d-slides')
-  const slideEls=items.map(()=>{const el=document.createElement('div');el.className='dslide';wrap.appendChild(el);return el})
-  const done=new Set()
-  if (cfg.transition==='none') slideEls.forEach(el=>el.style.transition='none')
+  const root = document.getElementById('d-root')
+  const wrap = document.getElementById('d-slides')
 
-  function build(i) {
-    if(done.has(i))return;done.add(i)
-    const item=items[i],el=slideEls[i]
-    if(item.file_type==='image'){
-      // Blurred background fill — same image, blurred + darkened behind the main image
-      const bg=document.createElement('div');bg.className='dslide-bg'
-      bg.style.backgroundImage=`url('${item.file_url}')`
-      el.appendChild(bg)
-      const img=new Image();img.src=item.file_url;img.draggable=false;el.appendChild(img)
+  // Create slide containers
+  const slideEls = items.map(() => {
+    const el = document.createElement('div'); el.className = 'dslide'; wrap.appendChild(el); return el
+  })
+  const built = new Set()
+  let idx = 0, alive = true, advTimer = null, progRaf = null, cursorT = null
+
+  if (cfg.transition === 'none') slideEls.forEach(el => el.style.transition = 'none')
+
+  function buildSlide(i) {
+    if (built.has(i)) return; built.add(i)
+    const item = items[i], el = slideEls[i]
+    if (item.file_type === 'image') {
+      const bg = document.createElement('div'); bg.className = 'dslide-bg'
+      bg.style.backgroundImage = `url('${item.file_url}')`; el.appendChild(bg)
+      const img = new Image(); img.src = item.file_url; img.draggable = false; el.appendChild(img)
+    } else if (item.file_type === 'pdf') {
+      renderPdfPage(item, el)
+    } else {
+      const fr = document.createElement('iframe')
+      fr.src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.file_url)}`
+      fr.allowFullscreen = true; el.appendChild(fr)
     }
-    else if(item.file_type==='pdf'){renderPdfPage(item,el)}
-    else{const fr=document.createElement('iframe');fr.src=`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(item.file_url)}`;fr.allowFullscreen=true;el.appendChild(fr)}
   }
 
-  // Write sync state to DB (master only)
-  async function pushSync(newIdx) {
-    if (!displayId) return
-    await db.from('sync').upsert({
-      display_id: displayId,
-      slide_index: newIdx,
-      started_at: new Date().toISOString(),
-      playlist_id: playlistId
-    })
-  }
-
-  // Apply a sync state — jump to correct slide, offset progress bar
-  function applySync(syncData) {
-    if (!syncData) return
-    const newIdx = ((syncData.slide_index % items.length) + items.length) % items.length
-    const startedAt = new Date(syncData.started_at).getTime()
-    const elapsed = Date.now() - startedAt
-    const dur = items[newIdx]?.duration_ms || cfg.default_duration_ms || 8000
-    const remaining = Math.max(0, dur - elapsed)
-
-    // Switch slide
-    slideEls[idx].classList.remove('active')
-    idx = newIdx
-    build(idx); build((idx+1)%items.length)
+  // Go to a slide, with optional elapsed offset (for sync)
+  function goTo(n, elapsedMs = 0) {
+    slideEls[idx]?.classList.remove('active')
+    idx = ((n % items.length) + items.length) % items.length
+    buildSlide(idx); buildSlide((idx + 1) % items.length)
     slideEls[idx].classList.add('active')
-    document.getElementById('d-ctr').textContent = `${idx+1} / ${items.length}`
+    document.getElementById('d-ctr').textContent = `${idx + 1} / ${items.length}`
+    schedule(elapsedMs)
+  }
 
-    // Progress bar starting from correct offset
-    clearTimeout(timer); cancelAnimationFrame(raf)
-    const alreadyPct = Math.min(100, (elapsed/dur)*100)
-    const t0 = performance.now() - elapsed
+  function schedule(elapsedMs = 0) {
+    clearTimeout(advTimer); cancelAnimationFrame(progRaf)
+    const dur = items[idx]?.duration_ms || cfg.default_duration_ms || 8000
+    const remaining = Math.max(500, dur - elapsedMs)
     const progEl = document.getElementById('d-prog')
-    if (progEl && cfg.show_progress) progEl.style.width = alreadyPct + '%'
 
-    const loop = () => {
-      if(!alive)return
-      const pct = Math.min(100,((performance.now()-t0)/dur)*100)
-      if(progEl&&cfg.show_progress)progEl.style.width=pct+'%'
-      if(pct<100)raf=requestAnimationFrame(loop)
+    // Animate progress bar from current position
+    if (cfg.show_progress && progEl) {
+      progEl.style.transition = 'none'
+      progEl.style.width = Math.min(100, (elapsedMs / dur) * 100) + '%'
+      requestAnimationFrame(() => {
+        const t0 = performance.now()
+        const startPct = Math.min(100, (elapsedMs / dur) * 100)
+        progEl.style.transition = ''
+        const tick = () => {
+          if (!alive) return
+          const pct = Math.min(100, startPct + ((performance.now() - t0) / remaining) * (100 - startPct))
+          progEl.style.width = pct + '%'
+          if (pct < 100) progRaf = requestAnimationFrame(tick)
+        }
+        progRaf = requestAnimationFrame(tick)
+      })
     }
-    if(cfg.show_progress)raf=requestAnimationFrame(loop)
 
-    // Schedule next slide (master only)
-    if (isMaster && (cfg.auto_loop || idx < items.length-1)) {
-      timer = setTimeout(() => {
-        if(!alive)return
-        const nextIdx = (idx+1) % items.length
-        pushSync(nextIdx)
-        applySync({ slide_index: nextIdx, started_at: new Date().toISOString(), playlist_id: rPl.data?.id })
+    // Auto-advance
+    if (cfg.auto_loop || idx < items.length - 1) {
+      advTimer = setTimeout(() => {
+        if (!alive) return
+        const next = (idx + 1) % items.length
+        writeSyncState(next)
+        goTo(next, 0)
       }, remaining)
     }
   }
 
-  // Become master: this tab drives the sync clock
-  function becomeMaster() {
-    if (isMaster) return
-    isMaster = true
-    localStorage.setItem(MASTER_KEY, Date.now().toString())
-    // Start from current idx
-    pushSync(idx)
-    applySync({ slide_index: idx, started_at: new Date().toISOString() })
+  async function writeSyncState(slideIdx) {
+    try {
+      await db.from('sync').upsert({
+        display_id: displayId,
+        slide_index: slideIdx,
+        started_at: new Date().toISOString(),
+        playlist_id: disp.playlist_id
+      })
+    } catch(_) {}
   }
 
-  // Check if we should be master (no other master recently)
-  function checkMaster() {
-    const last = parseInt(localStorage.getItem(MASTER_KEY) || '0')
-    const age  = Date.now() - last
-    // Become master if no heartbeat in last 3 seconds (other master gone)
-    if (age > 3000) becomeMaster()
+  // Cursor / UI visibility
+  const showUI = () => {
+    root.classList.add('ui-vis'); clearTimeout(cursorT)
+    cursorT = setTimeout(() => root.classList.remove('ui-vis'), 3000)
   }
+  root.addEventListener('mousemove', showUI); root.addEventListener('touchstart', showUI)
+  setTimeout(() => root.classList.remove('ui-vis'), 3000)
 
-  // Master heartbeat — keep localStorage fresh so other tabs know we're alive
-  const heartbeat = setInterval(() => {
-    if (!alive) return
-    if (isMaster) localStorage.setItem(MASTER_KEY, Date.now().toString())
-    else checkMaster()
-  }, 1000)
+  // Manual navigation
+  const manualGoTo = n => { writeSyncState(((n%items.length)+items.length)%items.length); goTo(n, 0) }
+  const sp = fn => e => { e.stopPropagation(); fn() }
+  root.onclick   = () => manualGoTo(idx + 1)
+  document.getElementById('d-prev').onclick = sp(() => manualGoTo(idx - 1))
+  document.getElementById('d-next').onclick = sp(() => manualGoTo(idx + 1))
+  document.getElementById('d-fs').onclick   = sp(() => document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.())
 
-  // Manual navigation always becomes master
-  function manualNav(n) {
-    isMaster = true
-    localStorage.setItem(MASTER_KEY, Date.now().toString())
-    const newIdx = ((n%items.length)+items.length)%items.length
-    pushSync(newIdx)
-    applySync({ slide_index: newIdx, started_at: new Date().toISOString() })
+  const onKey = e => {
+    if (e.key==='ArrowRight'||e.key===' '){e.preventDefault();manualGoTo(idx+1)}
+    if (e.key==='ArrowLeft'){e.preventDefault();manualGoTo(idx-1)}
+    if (e.key.toLowerCase()==='f') document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()
   }
+  window.addEventListener('keydown', onKey)
 
-  // UI
-  const showUI=()=>{root.classList.add('ui-vis');clearTimeout(cursorT);cursorT=setTimeout(()=>root.classList.remove('ui-vis'),3000)}
-  root.addEventListener('mousemove',showUI);root.addEventListener('touchstart',showUI)
-  setTimeout(()=>root.classList.remove('ui-vis'),3000)
-
-  const sp=fn=>e=>{e.stopPropagation();fn()}
-  root.onclick=()=>manualNav(idx+1)
-  document.getElementById('d-prev').onclick=sp(()=>manualNav(idx-1))
-  document.getElementById('d-next').onclick=sp(()=>manualNav(idx+1))
-  document.getElementById('d-fs').onclick=sp(()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.())
-
-  const onKey=e=>{
-    if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();manualNav(idx+1)}
-    if(e.key==='ArrowLeft'){e.preventDefault();manualNav(idx-1)}
-    if(e.key.toLowerCase()==='f')document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.()
-  }
-  window.addEventListener('keydown',onKey)
-
-  // Realtime: listen for sync updates from master
-  const chan=db.channel('display-rt')
-    .on('postgres_changes',{event:'*',schema:'public',table:'slides'},()=>{if(alive){alive=false;renderDisplay()}})
-    .on('postgres_changes',{event:'*',schema:'public',table:'settings'},()=>{if(alive){alive=false;renderDisplay()}})
-    .on('postgres_changes',{event:'*',schema:'public',table:'playlists'},()=>{if(alive){alive=false;renderDisplay()}})
-    .on('postgres_changes',{event:'*',schema:'public',table:'sync',filter:`display_id=eq.${displayId}`},(_,payload)=>{
-      if(!alive)return
-      const s = payload?.new || payload
-      // Non-masters just follow the sync signal
-      if(!isMaster) applySync(s)
+  // Realtime subscriptions
+  const chan = db.channel(`disp-${displayId}`)
+    // Follow sync updates from other screens showing the same display
+    .on('postgres_changes', { event:'*', schema:'public', table:'sync', filter:`display_id=eq.${displayId}` }, payload => {
+      if (!alive) return
+      const s = payload.new
+      if (!s) return
+      const newIdx = ((s.slide_index % items.length) + items.length) % items.length
+      if (newIdx === idx) return // already there
+      const elapsed = Math.max(0, Date.now() - new Date(s.started_at).getTime())
+      goTo(newIdx, elapsed)
     })
+    // Reload if playlist content changes
+    .on('postgres_changes', { event:'*', schema:'public', table:'slides' }, () => { if(alive){alive=false;renderDisplay(displayId)} })
+    // Reload if display goes offline or changes playlist
+    .on('postgres_changes', { event:'*', schema:'public', table:'displays', filter:`id=eq.${displayId}` }, () => { if(alive){alive=false;renderDisplay(displayId)} })
     .subscribe()
 
-  // Init: apply existing sync state or become master
-  if (rSync.data && rSync.data.playlist_id === playlistId) {
-    // There's an existing sync state — follow it (but check if master is alive)
-    applySync(rSync.data)
-    setTimeout(checkMaster, 2000) // Give existing master 2s to heartbeat
+  // ── START ──
+  // If there's a recent sync state, start from there; otherwise start fresh
+  const sync = rSync.data
+  if (sync && sync.playlist_id === disp.playlist_id) {
+    const elapsed = Math.max(0, Date.now() - new Date(sync.started_at).getTime())
+    const dur = items[sync.slide_index % items.length]?.duration_ms || cfg.default_duration_ms || 8000
+    if (elapsed < dur) {
+      // Sync state is current — join mid-slide
+      goTo(sync.slide_index, elapsed)
+    } else {
+      // Sync state is stale — calculate where we should be
+      let acc = 0, si = sync.slide_index
+      let remaining = elapsed
+      while (remaining > 0) {
+        const d = items[si % items.length]?.duration_ms || cfg.default_duration_ms || 8000
+        if (remaining < d) { goTo(si, remaining); break }
+        remaining -= d; si = (si + 1) % items.length
+        if (si === sync.slide_index % items.length) { goTo(si, 0); break } // full loop
+      }
+    }
   } else {
-    // No sync state yet — become master immediately
-    becomeMaster()
+    // No sync — start fresh and write state so other screens can join
+    writeSyncState(0)
+    goTo(0, 0)
   }
 
-  teardown=()=>{
-    alive=false
-    clearInterval(heartbeat)
-    if(isMaster) localStorage.removeItem(MASTER_KEY)
-    clearTimeout(timer);cancelAnimationFrame(raf);clearTimeout(cursorT)
-    window.removeEventListener('keydown',onKey)
+  teardown = () => {
+    alive = false
+    clearTimeout(advTimer); cancelAnimationFrame(progRaf); clearTimeout(cursorT)
+    window.removeEventListener('keydown', onKey)
     db.removeChannel(chan)
   }
 }
 
-async function renderPdfPage(item,el) {
-  const lib=await pdfjs()
-  if(!lib){el.innerHTML=`<div style="color:rgba(255,255,255,.25);text-align:center"><div style="font-size:40px;margin-bottom:10px">📄</div>PDF rendering unavailable</div>`;return}
+async function renderPdfPage(item, el) {
+  const lib = await pdfjs()
+  if (!lib) { el.innerHTML = `<div style="color:rgba(255,255,255,.2);text-align:center;padding:20px"><div style="font-size:36px;margin-bottom:8px">📄</div>PDF unavailable</div>`; return }
   try {
-    const pdf=await lib.getDocument(item.file_url).promise
-    const page=await pdf.getPage(item._page)
-    const vp=page.getViewport({scale:1})
-    const dpr=window.devicePixelRatio||1
-    const scale=Math.min(window.innerWidth/vp.width,window.innerHeight/vp.height)*dpr
-    const sv=page.getViewport({scale})
-    const canvas=document.createElement('canvas')
-    canvas.width=sv.width;canvas.height=sv.height
-    canvas.style.width=(sv.width/dpr)+'px';canvas.style.height=(sv.height/dpr)+'px'
+    const pdf   = await lib.getDocument(item.file_url).promise
+    const page  = await pdf.getPage(item._page)
+    const vp    = page.getViewport({ scale:1 })
+    const dpr   = window.devicePixelRatio || 1
+    const scale = Math.min(window.innerWidth/vp.width, window.innerHeight/vp.height) * dpr
+    const sv    = page.getViewport({ scale })
+    const canvas = document.createElement('canvas')
+    canvas.width = sv.width; canvas.height = sv.height
+    canvas.style.width  = (sv.width/dpr)+'px'
+    canvas.style.height = (sv.height/dpr)+'px'
     el.appendChild(canvas)
-    await page.render({canvasContext:canvas.getContext('2d'),viewport:sv}).promise
-  } catch(_){el.innerHTML=`<div style="color:rgba(255,255,255,.25);text-align:center"><div style="font-size:40px;margin-bottom:10px">📄</div>Could not render PDF</div>`}
+    await page.render({ canvasContext:canvas.getContext('2d'), viewport:sv }).promise
+  } catch(_) { el.innerHTML = `<div style="color:rgba(255,255,255,.2);text-align:center"><div style="font-size:36px;margin-bottom:8px">📄</div>Could not render PDF</div>` }
 }
 
-// ── HELPERS ───────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
 function expandSlides(slides) {
-  return slides.flatMap(s=>s.file_type==='pdf'&&s.page_count>1?Array.from({length:s.page_count},(_,i)=>({...s,_page:i+1})):[{...s,_page:1}])
+  return slides.flatMap(s =>
+    s.file_type==='pdf' && s.page_count>1
+      ? Array.from({length:s.page_count},(_,i)=>({...s,_page:i+1}))
+      : [{...s,_page:1}]
+  )
 }
 function fileType(name) {
-  const n=name.toLowerCase()
+  const n = name.toLowerCase()
   return n.endsWith('.pdf')?'pdf':(n.endsWith('.pptx')||n.endsWith('.ppt'))?'pptx':'image'
 }
-function fmtBytes(b){return b<1024?`${b} B`:b<1048576?`${(b/1024).toFixed(1)} KB`:`${(b/1048576).toFixed(1)} MB`}
 </script>
 </body>
 </html>
