@@ -228,7 +228,20 @@ async function pdfjs() {
   return _pdf
 }
 
-const db  = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const db  = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  auth: {
+    storage: window.sessionStorage,  // session dies when tab closes
+    persistSession: true,
+    autoRefreshToken: true
+  }
+})
+
+// Also wipe any old localStorage Supabase tokens from previous sessions
+try {
+  Object.keys(localStorage).forEach(k => {
+    if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k)
+  })
+} catch(_) {}
 const app = document.getElementById('app')
 let teardown = null
 
@@ -393,27 +406,13 @@ async function renderAdmin() {
     window.addEventListener(ev, resetIdle, { passive:true })
   })
   resetIdle()
-  // Logout when tab/window closes — clear session synchronously from localStorage
-  // (network calls in unload events are unreliable, but localStorage writes always complete)
-  const onUnload = () => {
-    try {
-      // Supabase stores the session under a key like "sb-<project-ref>-auth-token"
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith('sb-') && k.endsWith('-auth-token')) localStorage.removeItem(k)
-      })
-    } catch(_) {}
-  }
-  window.addEventListener('pagehide', onUnload)
-  window.addEventListener('beforeunload', onUnload)
-  // Cleanup on route change
+  // Cleanup on route change (sessionStorage handles tab-close logout automatically)
   const prevTeardown = teardown
   teardown = () => {
     clearTimeout(idleTimer)
     ;['mousemove','mousedown','keydown','touchstart','scroll'].forEach(ev => {
       window.removeEventListener(ev, resetIdle)
     })
-    window.removeEventListener('pagehide', onUnload)
-    window.removeEventListener('beforeunload', onUnload)
     prevTeardown?.()
   }
   // ─── End auto-logout ───
