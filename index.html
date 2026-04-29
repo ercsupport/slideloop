@@ -200,6 +200,7 @@ select.si{cursor:pointer}
 /* ── TOAST ── */
 .footer{position:fixed;bottom:16px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,.4);font-weight:400;letter-spacing:.04em;pointer-events:none;z-index:50}
 .footer span{color:rgba(255,255,255,.7);font-weight:600;background:linear-gradient(135deg,#d4a84b,#8b6fc4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.footer .footer-ver,.footer .footer-yr{background:none;-webkit-text-fill-color:rgba(255,255,255,.35);color:rgba(255,255,255,.35);font-weight:400;font-size:11px;letter-spacing:.06em}
 #toasts{position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none}
 .toast{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:13px;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:slideUp .2s ease}
 
@@ -210,7 +211,7 @@ select.si{cursor:pointer}
 </head>
 <body>
 <div id="app"></div>
-<div class="footer">Made by <span>Marek</span></div>
+<div class="footer">SlideLoop <span class="footer-ver">v1.0</span> &nbsp;·&nbsp; Developed by <span>Marek</span> &nbsp;·&nbsp; <span class="footer-yr">© 2026</span></div>
 <div id="toasts"></div>
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
